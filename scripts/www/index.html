@@ -4,288 +4,559 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>💌 与她的点点滴滴</title>
-<!-- Firebase SDK 国内可访问稳定版 -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<!-- 第三方库 -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"微软雅黑",sans-serif}
-html{height:100%;scroll-behavior:smooth}
-body{height:100%;min-height:100vh;background:linear-gradient(135deg,#fff0f5,#fef4f8,#ffeaf2);padding:12px;padding-bottom:120px;transition:all 0.3s ease;position:relative;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
-body.keyboard-open{padding-bottom:calc(65vh + 40px) !important}
+:root {
+  --theme-primary: #ec407a;
+  --theme-light: #fce4ec;
+  --theme-dark: #c2185b;
+  --theme-gradient: linear-gradient(135deg, #fff0f5, #fef4f8, #ffeaf2);
+  --card-bg: rgba(255,255,255,0.96);
+  --text-main: #333;
+  --text-sub: #666;
+  --text-desc: #888;
+  --border: #f8c8dc;
+  --shadow: 0 6px 18px rgba(216,27,96,0.08);
+  --radius: 20px;
+  --radius-sm: 14px;
+  --radius-xs: 10px;
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "微软雅黑", sans-serif;
+}
+html { height: 100%; scroll-behavior: smooth; }
+body {
+  min-height: 100vh;
+  background: var(--theme-gradient);
+  color: var(--text-main);
+  padding: 12px;
+  padding-bottom: 120px;
+  transition: all 0.3s ease;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+body.keyboard-open {
+  padding-bottom: calc(65vh + 40px) !important;
+}
 
-/* 全局弹窗 */
-.modal{position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;z-index:9999}
-.modal-card{background:rgba(255,255,255,0.97);border-radius:24px;width:92%;max-width:380px;padding:28px;text-align:center;box-shadow:0 15px 40px rgba(216,27,96,0.15)}
-.modal-title{font-size:20px;color:#c2185b;font-weight:700;margin-bottom:16px}
-.modal-desc{font-size:13px;color:#777;margin-bottom:12px;line-height:1.4}
-.modal-input{width:100%;padding:14px;border:1px solid #f8c8dc;border-radius:14px;margin:10px 0;font-size:15px;text-align:center;outline:none}
-.modal-btns{display:flex;gap:10px;margin-top:16px}
-.modal-btn{flex:1;padding:14px;border-radius:14px;border:none;font-size:15px;font-weight:500;transition:transform 0.2s ease}
-.modal-btn:active{transform:scale(0.96)}
-.btn-main{background:#c2185b;color:#fff}
-.btn-sub{background:#fce4ec;color:#c2185b}
-.btn-danger{background:#ef4444;color:#fff}
+/* 模态框 */
+.modal {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5); backdrop-filter: blur(10px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 9999;
+}
+.modal-card {
+  background: var(--card-bg); border-radius: var(--radius);
+  width: 92%; max-width: 380px; padding: 28px; text-align: center;
+  box-shadow: var(--shadow);
+}
+.modal-title {
+  font-size: 20px; color: var(--theme-primary); font-weight: 700;
+  margin-bottom: 16px;
+}
+.modal-desc {
+  font-size: 13px; color: var(--text-desc); margin-bottom: 12px;
+  line-height: 1.4;
+}
+.modal-input {
+  width: 100%; padding: 14px; border: 1px solid var(--border);
+  border-radius: var(--radius-sm); margin: 10px 0; font-size: 15px;
+  text-align: center; outline: none; background: var(--card-bg);
+  color: var(--text-main);
+}
+.modal-btns { display: flex; gap: 10px; margin-top: 16px; }
+.modal-btn {
+  flex: 1; padding: 14px; border-radius: var(--radius-sm);
+  border: none; font-size: 15px; font-weight: 500;
+  transition: transform 0.2s ease, background 0.2s;
+}
+.modal-btn:active { transform: scale(0.96); }
+.btn-main { background: var(--theme-primary); color: #fff; }
+.btn-sub { background: var(--theme-light); color: var(--theme-primary); }
+.btn-danger { background: #ef4444; color: #fff; }
 
-/* 头部样式 */
-.header{text-align:center;padding:20px 0 14px}
-.main-title{font-size:26px;color:#c2185b;font-weight:700;background:linear-gradient(90deg,#c2185b,#ec407a);-webkit-background-clip:text;background-clip:text;color:transparent}
-#girlName{font-size:18px;color:#ec407a;font-weight:600;margin-top:6px}
-#userStatus{font-size:12px;color:#999;margin-top:4px}
-.sub-title{font-size:13px;color:#888;margin-top:4px}
+/* 图片预览 */
+#imgPreviewModal {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+  z-index: 99999; display: flex; align-items: center;
+  justify-content: center; padding: 10px; touch-action: pan-x pan-y;
+}
+#previewImg {
+  max-width: 100%; max-height: 90vh; object-fit: contain;
+  border-radius: 12px; user-select: none; transform-origin: center;
+}
+#imgPreviewModal .close {
+  position: absolute; top: 20px; right: 20px; color: #fff;
+  font-size: 30px; width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.2); border-radius: 50%; cursor: pointer;
+}
 
-/* 统计卡片 */
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 18px}
-.stat-card{background:rgba(255,255,255,0.95);border-radius:18px;padding:14px 8px;text-align:center;box-shadow:0 4px 12px rgba(216,27,96,0.08);transition:transform 0.2s ease}
-.stat-card:active{transform:scale(0.98)}
-.stat-num{font-size:20px;color:#c2185b;font-weight:700}
-.stat-text{font-size:12px;color:#666;margin-top:4px}
+/* 头部 */
+.header { text-align: center; padding: 20px 0 14px; }
+.main-title {
+  font-size: 26px; font-weight: 700;
+  background: linear-gradient(90deg, var(--theme-dark), var(--theme-primary));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+#girlName {
+  font-size: 18px; color: var(--theme-primary); font-weight: 600;
+  margin-top: 6px;
+}
+#userStatus {
+  font-size: 12px; color: var(--text-desc); margin-top: 4px;
+}
+.sub-title { font-size: 13px; color: var(--text-desc); margin-top: 4px; }
 
-/* 标签栏（完美横向） */
-.tabs{display:grid;grid-template-columns:repeat(4,1fr);background:rgba(255,255,255,0.9);border-radius:18px;padding:6px;gap:4px;margin-bottom:18px}
-.tab{padding:10px 4px;text-align:center;border-radius:14px;font-size:13px;color:#777;transition:all 0.2s ease}
-.tab.active{background:#fce4ec;color:#c2185b;font-weight:600}
-.tab:active{transform:scale(0.96)}
+/* 统计 */
+.stats {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 8px; margin: 10px 0 18px;
+}
+.stat-card {
+  background: var(--card-bg); border-radius: var(--radius-sm);
+  padding: 14px 8px; text-align: center; box-shadow: var(--shadow);
+  transition: transform 0.2s ease;
+}
+.stat-card:active { transform: scale(0.98); }
+.stat-num {
+  font-size: 20px; color: var(--theme-primary); font-weight: 700;
+}
+.stat-text { font-size: 12px; color: var(--text-sub); margin-top: 4px; }
 
-/* 内容卡片 */
-.card{background:rgba(255,255,255,0.96);border-radius:20px;padding:20px;margin-bottom:16px;box-shadow:0 6px 18px rgba(216,27,96,0.08);transition:transform 0.2s ease}
-.card:active{transform:translateY(1px)}
-.card-title{font-size:17px;color:#c2185b;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:6px}
-label{font-size:14px;color:#555;margin-bottom:6px;display:block;font-weight:500}
-input,textarea,select{width:100%;border:1px solid #f8c8dc;border-radius:14px;padding:13px 14px;font-size:14px;margin-bottom:12px;outline:none;background:#fff;transition:all 0.2s ease}
-input:focus,textarea:focus,select:focus{border-color:#ec407a;box-shadow:0 0 0 4px rgba(236,64,122,0.15)}
-textarea{resize:none;height:96px;line-height:1.5}
+/* 标签 */
+.tabs {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  background: var(--card-bg); border-radius: var(--radius-sm);
+  padding: 6px; gap: 4px; margin-bottom: 18px;
+}
+.tab {
+  padding: 10px 4px; text-align: center; border-radius: var(--radius-xs);
+  font-size: 12px; color: var(--text-sub); transition: all 0.2s ease;
+}
+.tab.active {
+  background: var(--theme-light); color: var(--theme-primary);
+  font-weight: 600;
+}
+.tab:active { transform: scale(0.96); }
 
-/* 图片上传样式 */
-.photo-upload{border:2px dashed #f8c8dc;border-radius:14px;padding:18px;text-align:center;margin-bottom:12px;transition:all 0.2s ease}
-.photo-upload:active{border-color:#ec407a;background:#fce4ec}
-.photo-preview{max-width:100%;border-radius:12px;margin-top:10px;max-height:260px;object-fit:contain}
-.photo-remove{margin-top:8px;padding:8px 14px;border-radius:10px;border:none;background:#fee2e2;color:#dc2626;font-size:12px}
-.record-photo{max-width:100%;border-radius:12px;margin:10px 0;max-height:320px;object-fit:contain;display:block;cursor:pointer}
+/* 卡片 */
+.card {
+  background: var(--card-bg); border-radius: var(--radius);
+  padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow);
+  transition: transform 0.2s ease;
+}
+.card:active { transform: translateY(1px); }
+.card-title {
+  font-size: 17px; color: var(--theme-primary); font-weight: 600;
+  margin-bottom: 14px; display: flex; align-items: center; gap: 6px;
+}
+label {
+  font-size: 14px; color: var(--text-sub); margin-bottom: 6px;
+  display: block; font-weight: 500;
+}
+input, textarea, select {
+  width: 100%; border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 13px 14px; font-size: 14px;
+  margin-bottom: 12px; outline: none; background: var(--card-bg);
+  color: var(--text-main); transition: all 0.2s ease;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--theme-primary);
+  box-shadow: 0 0 0 4px rgba(var(--theme-primary-rgb), 0.15);
+}
+textarea {
+  resize: none; height: 96px; line-height: 1.5;
+}
 
-/* 快捷心情 */
-.mood-box{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
-.mood-item{padding:8px 14px;background:#fce4ec;border-radius:12px;font-size:13px;color:#c2185b;transition:all 0.2s ease}
-.mood-item.active{background:#c2185b;color:#fff}
-.mood-item:active{transform:scale(0.95)}
+/* 上传 */
+.photo-upload {
+  border: 2px dashed var(--border); border-radius: var(--radius-sm);
+  padding: 18px; text-align: center; margin-bottom: 12px;
+  transition: all 0.2s ease;
+}
+.photo-upload:active {
+  border-color: var(--theme-primary); background: var(--theme-light);
+}
+.photo-preview, .record-photo {
+  max-width: 100%; border-radius: 12px; margin: 10px 0;
+  max-height: 320px; object-fit: contain; display: block; cursor: pointer;
+}
+.photo-remove {
+  margin-top: 8px; padding: 8px 14px; border-radius: var(--radius-xs);
+  border: none; background: #fee2e2; color: #dc2626; font-size: 12px;
+}
 
-/* 搜索&筛选栏 */
-.search-box{margin-bottom:14px}
-.search-input{width:100%;padding:13px 16px;border-radius:14px;border:1px solid #f8c8dc;font-size:14px}
-.filter-box{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
-.filter-item,.sort-item{padding:7px 11px;background:#fff;border:1px solid #f8c8dc;border-radius:10px;font-size:12px;color:#c2185b;transition:all 0.2s ease}
-.filter-item.active,.sort-item.active{background:#c2185b;color:#fff;border-color:#c2185b}
-.filter-item:active,.sort-item:active{transform:scale(0.95)}
+/* 心情 */
+.mood-box {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px;
+}
+.mood-item {
+  padding: 8px 14px; background: var(--theme-light);
+  border-radius: var(--radius-xs); font-size: 13px;
+  color: var(--theme-primary); transition: all 0.2s ease;
+}
+.mood-item.active {
+  background: var(--theme-primary); color: #fff;
+}
+.mood-item:active { transform: scale(0.95); }
 
-/* 按钮组 */
-.btn-group{display:grid;grid-template-columns:1fr;gap:12px;margin:14px 0}
-.btn{padding:15px;border-radius:14px;border:none;font-size:15px;font-weight:500;transition:all 0.2s ease}
-.btn:active{transform:scale(0.97)}
-.btn-primary{background:#c2185b;color:#fff}
-.btn-light{background:#fce4ec;color:#c2185b}
-.btn-full{grid-column:span 1}
+/* 搜索筛选 */
+.search-box { margin-bottom: 14px; }
+.search-input {
+  width: 100%; padding: 13px 16px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); font-size: 14px;
+  background: var(--card-bg); color: var(--text-main);
+}
+.filter-box {
+  display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px;
+}
+.filter-item, .sort-item {
+  padding: 7px 11px; background: var(--card-bg);
+  border: 1px solid var(--border); border-radius: var(--radius-xs);
+  font-size: 12px; color: var(--theme-primary); transition: all 0.2s ease;
+}
+.filter-item.active, .sort-item.active {
+  background: var(--theme-primary); color: #fff;
+  border-color: var(--theme-primary);
+}
+.filter-item:active, .sort-item:active { transform: scale(0.95); }
+
+/* 按钮 */
+.btn-group {
+  display: grid; grid-template-columns: 1fr; gap: 12px; margin: 14px 0;
+}
+.btn {
+  padding: 15px; border-radius: var(--radius-sm); border: none;
+  font-size: 15px; font-weight: 500; transition: all 0.2s ease;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: var(--theme-primary); color: #fff; }
+.btn-light { background: var(--theme-light); color: var(--theme-primary); }
+.btn-full { grid-column: span 1; }
 
 /* 记录列表 */
-.record-list{margin-top:14px;padding-bottom:40px}
-.record-item{background:#fff;border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:0 3px 10px rgba(0,0,0,0.05);border-left:4px solid #ec407a;transition:transform 0.2s ease;position:relative;overflow:hidden}
-.record-item::before{content:"💖";position:absolute;top:10px;right:10px;opacity:0.15;font-size:22px}
-.record-item:active{transform:translateX(2px)}
-.record-time{font-size:12px;color:#999;margin-bottom:6px}
-.record-type{display:inline-block;padding:4px 9px;background:#fce4ec;color:#c2185b;border-radius:8px;font-size:11px;margin-bottom:8px;font-weight:500}
-.record-text{font-size:14px;line-height:1.6;color:#333;margin:6px 0;word-break:break-all}
-.record-op{display:flex;gap:10px;margin-top:12px}
-.op-btn{flex:1;padding:8px;border-radius:12px;border:none;font-size:12px;background:#f3f4f6;color:#666;transition:all 0.2s ease}
-.op-btn:active{transform:scale(0.95)}
-.op-btn.edit{background:#fce4ec;color:#c2185b}
-.op-btn.danger{background:#fee2e2;color:#dc2626}
+.record-list { margin-top: 14px; padding-bottom: 40px; }
+.record-item {
+  background: var(--card-bg); border-radius: var(--radius-sm);
+  padding: 18px; margin-bottom: 14px; box-shadow: var(--shadow);
+  border-left: 4px solid var(--theme-primary);
+  transition: transform 0.2s ease; position: relative; overflow: hidden;
+}
+.record-item::before {
+  content: "💖"; position: absolute; top: 10px; right: 10px;
+  opacity: 0.15; font-size: 22px;
+}
+.record-item:active { transform: scale(0.99); }
+.record-time {
+  font-size: 12px; color: var(--text-desc); margin-bottom: 6px;
+}
+.record-type {
+  display: inline-block; padding: 4px 9px; background: var(--theme-light);
+  color: var(--theme-primary); border-radius: var(--radius-xs);
+  font-size: 11px; margin-bottom: 8px; font-weight: 500;
+}
+.record-text {
+  font-size: 14px; line-height: 1.6; color: var(--text-main);
+  margin: 6px 0; word-break: break-all;
+}
+.record-op {
+  display: flex; gap: 10px; margin-top: 12px;
+}
+.op-btn {
+  flex: 1; padding: 8px; border-radius: var(--radius-xs);
+  border: none; font-size: 12px; background: #f3f4f6;
+  color: var(--text-sub); transition: all 0.2s ease;
+}
+.op-btn:active { transform: scale(0.95); }
+.op-btn.edit {
+  background: var(--theme-light); color: var(--theme-primary);
+}
+.op-btn.danger {
+  background: #fee2e2; color: #dc2626;
+}
 
-/* 内容页切换 */
-.tab-content{display:none}
-.tab-content.active{display:block}
+/* 内容区 */
+.tab-content { display: none; }
+.tab-content.active { display: block; }
 
-/* 自定义档案 */
-.custom-item{display:flex;gap:8px;margin-bottom:10px;align-items:center}
-.custom-item input{flex:1;margin:0}
-.del-custom-btn{width:34px;height:34px;border-radius:10px;border:none;background:#fee2e2;color:#dc2626;font-size:12px;flex-shrink:0}
+/* 自定义项 */
+.custom-item {
+  display: flex; gap: 8px; margin-bottom: 10px; align-items: center;
+}
+.custom-item input { flex: 1; margin: 0; }
+.del-custom-btn {
+  width: 34px; height: 34px; border-radius: var(--radius-xs);
+  border: none; background: #fee2e2; color: #dc2626;
+  font-size: 12px; flex-shrink: 0;
+}
 
-#bottomSafeSpace{height:200px;width:100%}
-.empty{text-align:center;padding:50px 0;color:#999;font-size:14px;line-height:1.5}
-.heart{animation:heartBeat 0.6s ease-in-out}
-@keyframes heartBeat{0%{transform:scale(1)}50%{transform:scale(1.25)}100%{transform:scale(1)}}
+/* 空状态 */
+.empty {
+  text-align: center; padding: 50px 0; color: var(--text-desc);
+  font-size: 14px; line-height: 1.5;
+}
 
-/* 护眼模式全适配 */
-body.dark{background:linear-gradient(135deg,#2a1a20,#352029);color:#f5f5f5}
-body.dark .card,body.dark .record-item,body.dark .modal-card,body.dark .stat-card{background:rgba(40,40,40,0.96);color:#f5f5f5}
-body.dark input,body.dark textarea,body.dark select{background:#333;color:#f5f5f5;border-color:#666}
-body.dark input:focus,body.dark textarea:focus,body.dark select:focus{border-color:#ec407a;box-shadow:0 0 0 4px rgba(236,64,122,0.2)}
-body.dark label,body.dark .record-text{color:#e5e5e5}
-body.dark .sub-title,body.dark .record-time,body.dark .modal-desc{color:#aaa}
-body.dark .filter-item,body.dark .sort-item{background:#333;border-color:#666}
-body.dark .photo-upload{border-color:#666}
-body.dark .photo-upload:active{border-color:#ec407a;background:rgba(236,64,122,0.12)}
+/* 动画 */
+.heart { animation: heartBeat 0.6s ease-in-out; }
+@keyframes heartBeat {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
 
-.word-count{text-align:right;font-size:12px;color:#999;margin-top:-8px;margin-bottom:10px}
-body.dark .word-count{color:#aaa}
+/* 字数统计 */
+.word-count {
+  text-align: right; font-size: 12px; color: var(--text-desc);
+  margin-top: -8px; margin-bottom: 10px;
+}
+
+/* 时光轴 */
+.timeline { padding: 20px 0; }
+.timeline-year {
+  font-size: 16px; color: var(--theme-primary); font-weight: 600;
+  margin: 20px 0 10px; padding-left: 10px;
+}
+.timeline-line {
+  border-left: 2px solid var(--border); padding-left: 20px;
+  margin-left: 10px;
+}
+.timeline-item {
+  position: relative; margin-bottom: 20px;
+}
+.timeline-item::before {
+  content: ""; position: absolute; left: -26px; top: 6px;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--theme-primary);
+}
+.timeline-date {
+  font-size: 12px; color: var(--text-desc); margin-bottom: 4px;
+}
+.timeline-content {
+  background: var(--card-bg); border-radius: var(--radius-xs);
+  padding: 12px; box-shadow: var(--shadow);
+}
+
+/* 日历 */
+.calendar {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  gap: 4px; margin: 10px 0;
+}
+.calendar-day {
+  aspect-ratio: 1; display: flex; align-items: center;
+  justify-content: center; border-radius: var(--radius-xs);
+  font-size: 12px; background: var(--card-bg); color: var(--text-sub);
+}
+.calendar-day.active { background: var(--theme-primary); color: #fff; }
+
+/* 饼图 */
+.chart-box { height: 200px; margin: 10px 0; }
 </style>
 </head>
 <body>
 
-<!-- 登录/注册弹窗（唯一启动验证） -->
+<!-- 图片预览 -->
+<div id="imgPreviewModal" style="display:none;" onclick="closeImgPreview()">
+  <div class="close">×</div>
+  <img id="previewImg" src="">
+</div>
+
+<!-- 登录 -->
 <div class="modal" id="loginModal">
-    <div class="modal-card">
-        <div class="modal-title">💌 云端备忘录</div>
-        <input type="email" class="modal-input" id="loginEmail" placeholder="请输入邮箱">
-        <input type="password" class="modal-input" id="loginPwd" placeholder="请输入密码（6位以上）">
-        <div class="modal-btns">
-            <button class="modal-btn btn-sub" onclick="register()">注册账号</button>
-            <button class="modal-btn btn-main" onclick="login()">登录账号</button>
-        </div>
-        <div class="modal-desc" style="margin-top:10px">注册/登录后，数据自动云端同步，多设备互通</div>
+  <div class="modal-card">
+    <div class="modal-title">💌 与她的点点滴滴</div>
+    <input type="email" class="modal-input" id="loginEmail" placeholder="邮箱">
+    <input type="password" class="modal-input" id="loginPwd" placeholder="密码（≥6位）">
+    <div class="modal-btns">
+      <button class="modal-btn btn-sub" onclick="register()">注册</button>
+      <button class="modal-btn btn-main" onclick="login()">登录</button>
     </div>
+    <div class="modal-desc">登录后自动云端同步</div>
+  </div>
 </div>
 
-<!-- 主界面 -->
-<div class="main-app-content" style="display:none">
-    <div class="header">
-        <div class="main-title">💌 与她的点点滴滴</div>
-        <div id="girlName">我的女孩</div>
-        <div id="userStatus">🟢 已登录</div>
-        <div class="sub-title">用心珍藏每一个温柔瞬间</div>
-    </div>
+<!-- 主内容 -->
+<div class="main-app-content" style="display:none;">
+  <div class="header">
+    <div class="main-title">💌 与她的点点滴滴</div>
+    <div id="girlName">我的女孩</div>
+    <div id="userStatus">🟢 已登录</div>
+    <div class="sub-title">用心珍藏每一个温柔瞬间</div>
+  </div>
 
-    <!-- 统计栏 -->
-    <div class="stats">
-        <div class="stat-card"><div class="stat-num" id="totalNum">0</div><div class="stat-text">总记录</div></div>
-        <div class="stat-card"><div class="stat-num" id="loveDay">0</div><div class="stat-text">陪伴天数</div></div>
-        <div class="stat-card"><div class="stat-num" id="nextDay">0</div><div class="stat-text">生日倒计时</div></div>
-    </div>
+  <div class="stats">
+    <div class="stat-card"><div class="stat-num" id="totalNum">0</div><div class="stat-text">总记录</div></div>
+    <div class="stat-card"><div class="stat-num" id="loveDay">0</div><div class="stat-text">陪伴天数</div></div>
+    <div class="stat-card"><div class="stat-num" id="nextDay">0</div><div class="stat-text">生日倒计时</div></div>
+  </div>
 
-    <!-- 标签导航（完美横向） -->
-    <div class="tabs">
-        <div class="tab active" onclick="switchTab(0)">写记录</div>
-        <div class="tab" onclick="switchTab(1)">查回忆</div>
-        <div class="tab" onclick="switchTab(2)">她的档案</div>
-        <div class="tab" onclick="switchTab(3)">设置</div>
-    </div>
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(0)">✍️写记录</div>
+    <div class="tab" onclick="switchTab(1)">🔍查回忆</div>
+    <div class="tab" onclick="switchTab(2)">📜时光轴</div>
+    <div class="tab" onclick="switchTab(3)">🎯她的档案</div>
+    <div class="tab" onclick="switchTab(4)">⚙️设置</div>
+  </div>
 </div>
 
-<!-- 1.写记录页（已优化输入法适配） -->
+<!-- 写记录 -->
 <div class="tab-content active" id="tab0">
-    <div class="card">
-        <div class="card-title">✍️ 记录心动瞬间</div>
-        <label>📂 记录分类</label>
-        <select id="recordType">
-            <option>日常小事</option>
-            <option>心动时刻</option>
-            <option>约会回忆</option>
-            <option>初见纪念</option>
-        </select>
+  <div class="card">
+    <div class="card-title">✍️ 记录心动瞬间</div>
+    <label>📂 分类</label>
+    <select id="recordType">
+      <option>日常小事</option>
+      <option>心动时刻</option>
+      <option>约会回忆</option>
+      <option>初见纪念</option>
+    </select>
 
-        <label>😊 快捷心情</label>
-        <div class="mood-box">
-            <div class="mood-item" onclick="selectMood(this,'开心')">开心</div>
-            <div class="mood-item" onclick="selectMood(this,'心动')">心动</div>
-            <div class="mood-item" onclick="selectMood(this,'想念')">想念</div>
-            <div class="mood-item" onclick="selectMood(this,'温暖')">温暖</div>
-            <div class="mood-item" onclick="selectMood(this,'害羞')">害羞</div>
-            <div class="mood-item" onclick="selectMood(this,'期待')">期待</div>
-        </div>
-        <input type="text" id="moodText" class="keyboard-scroll-target" placeholder="也可手动输入自定义心情">
-
-        <label>💌 今日故事</label>
-        <textarea id="recordContent" class="keyboard-scroll-target" placeholder="记录你们的聊天、见面、心动的小细节..." oninput="updateWordCount()"></textarea>
-        <div class="word-count" id="wordCount1">0 字</div>
-
-        <label>💬 心动语录</label>
-        <textarea id="recordQuote" class="keyboard-scroll-target" placeholder="她对你说的暖心话、可爱的口头禅..." oninput="updateWordCount()"></textarea>
-        <div class="word-count" id="wordCount2">0 字</div>
-
-        <label>📸 上传图片（聊天记录/合照）</label>
-        <div class="photo-upload" onclick="document.getElementById('photoInput').click()">
-            <div style="color:#c2185b;font-size:14px">点击上传图片</div>
-            <div style="color:#888;font-size:12px;margin-top:4px">支持聊天记录截图、合照等</div>
-            <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
-        </div>
-        <div id="photoPreviewWrap"></div>
+    <label>😊 心情</label>
+    <div class="mood-box">
+      <div class="mood-item" onclick="selectMood(this,'开心')">开心</div>
+      <div class="mood-item" onclick="selectMood(this,'心动')">心动</div>
+      <div class="mood-item" onclick="selectMood(this,'想念')">想念</div>
+      <div class="mood-item" onclick="selectMood(this,'温暖')">温暖</div>
+      <div class="mood-item" onclick="selectMood(this,'害羞')">害羞</div>
+      <div class="mood-item" onclick="selectMood(this,'期待')">期待</div>
     </div>
+    <input type="text" id="moodText" class="keyboard-scroll-target" placeholder="自定义心情">
 
-    <div class="btn-group">
-        <button class="btn btn-primary btn-full" onclick="saveRecord()">💾 保存记录（自动记录时间）</button>
+    <label>💌 故事</label>
+    <textarea id="recordContent" class="keyboard-scroll-target" placeholder="记录细节..." oninput="updateWordCount()"></textarea>
+    <div class="word-count" id="wordCount1">0 字</div>
+
+    <label>💬 语录</label>
+    <textarea id="recordQuote" class="keyboard-scroll-target" placeholder="她的暖心话..." oninput="updateWordCount()"></textarea>
+    <div class="word-count" id="wordCount2">0 字</div>
+
+    <label>📸 图片</label>
+    <div class="photo-upload" onclick="document.getElementById('photoInput').click()">
+      <div style="color:var(--theme-primary)">点击上传</div>
+      <input type="file" id="photoInput" accept="image/*" style="display:none;" onchange="handlePhotoUpload(event)">
     </div>
-    <div id="bottomSafeSpace"></div>
+    <div id="photoPreviewWrap"></div>
+  </div>
+
+  <div class="btn-group">
+    <button class="btn btn-primary btn-full" onclick="saveRecord()">💾 保存记录</button>
+  </div>
 </div>
 
-<!-- 2.查回忆页 -->
+<!-- 查回忆 -->
 <div class="tab-content" id="tab1">
-    <div class="card">
-        <div class="card-title">🔍 搜索&筛选回忆</div>
-        <div class="search-box">
-            <input type="text" class="search-input" id="searchInput" placeholder="输入关键词搜索记录..." oninput="searchRecord()">
-        </div>
-        <div class="filter-box">
-            <div class="filter-item active" onclick="filterRecord(this,'all')">全部</div>
-            <div class="filter-item" onclick="filterRecord(this,'日常小事')">日常</div>
-            <div class="filter-item" onclick="filterRecord(this,'心动时刻')">心动</div>
-            <div class="filter-item" onclick="filterRecord(this,'约会回忆')">约会</div>
-            <div class="filter-item" onclick="filterRecord(this,'初见纪念')">初见</div>
-        </div>
-        <div class="filter-box">
-            <div class="sort-item active" onclick="sortRecord(this,'desc')">最新在前</div>
-            <div class="sort-item" onclick="sortRecord(this,'asc')">最早在前</div>
-        </div>
+  <div class="card">
+    <div class="card-title">🔍 回忆管理</div>
+    <div class="search-box">
+      <input type="text" class="search-input" id="searchInput" placeholder="搜索关键词" oninput="searchRecord()">
     </div>
-    <div class="record-list" id="recordBox"></div>
+    <div class="filter-box">
+      <div class="filter-item active" onclick="filterRecord(this,'all')">全部</div>
+      <div class="filter-item" onclick="filterRecord(this,'日常小事')">日常</div>
+      <div class="filter-item" onclick="filterRecord(this,'心动时刻')">心动</div>
+      <div class="filter-item" onclick="filterRecord(this,'约会回忆')">约会</div>
+      <div class="filter-item" onclick="filterRecord(this,'初见纪念')">初见</div>
+    </div>
+    <div class="filter-box">
+      <div class="sort-item active" onclick="sortRecord(this,'desc')">最新</div>
+      <div class="sort-item" onclick="sortRecord(this,'asc')">最早</div>
+      <div class="sort-item" onclick="exportPdf()">导出PDF</div>
+      <div class="sort-item" onclick="exportImage()">导出长图</div>
+    </div>
+  </div>
+  <div class="record-list" id="recordBox"></div>
 </div>
 
-<!-- 3.她的档案页 -->
+<!-- 时光轴 -->
 <div class="tab-content" id="tab2">
-    <div class="card">
-        <div class="card-title">🎯 她的专属档案</div>
-        <label>👧 她的昵称/名字</label>
-        <input type="text" id="nickname" placeholder="比如：宝贝、小乖、她的名字">
-
-        <label>🎂 她的生日</label>
-        <input type="date" id="birthday">
-        <div class="modal-desc" style="margin:-5px 0 10px 0">用于生日倒计时提醒，每年自动更新</div>
-
-        <label>👋 相识/初见日</label>
-        <input type="date" id="firstDay">
-        <div class="modal-desc" style="margin:-5px 0 10px 0">你们刚认识的那天，自动计算陪伴天数</div>
-
-        <label>🍬 喜欢的事物</label>
-        <input type="text" id="like" placeholder="爱吃的食物、爱好、喜欢的礼物、颜色...">
-
-        <label>🚫 忌口/雷区</label>
-        <input type="text" id="hate" placeholder="不吃的食物、讨厌的事、不能碰的雷区...">
-
-        <label>✨ 小习惯/小癖好</label>
-        <input type="text" id="habit" placeholder="生活小习惯、可爱的小癖好、口头禅...">
-        
-        <div class="card-title" style="margin-top:20px">📌 自定义信息</div>
-        <div class="modal-desc" style="margin:-8px 0 10px 0">可无限添加，比如：鞋码、星座、生理期、喜欢的歌...</div>
-        <div id="customWrap"></div>
-        <button class="btn btn-light btn-full" onclick="addCustom()">➕ 添加自定义项</button>
-        <button class="btn btn-primary btn-full" onclick="saveProfile()">✅ 保存档案（自动同步云端）</button>
-    </div>
+  <div class="card">
+    <div class="card-title">📜 时光轴</div>
+    <div class="timeline" id="timelineBox"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">📅 回忆日历</div>
+    <div class="calendar" id="calendarBox"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">😊 心情统计</div>
+    <div class="chart-box"><canvas id="moodChart"></canvas></div>
+  </div>
 </div>
 
-<!-- 4.设置页（已美化间距） -->
+<!-- 她的档案 -->
 <div class="tab-content" id="tab3">
-    <div class="card">
-        <div class="card-title">⚙️ 账号设置</div>
-        <div style="display:flex;flex-direction:column;gap:12px">
-            <button class="btn btn-light btn-full" onclick="toggleDark()">🌙 护眼模式切换</button>
-            <button class="btn btn-light btn-full" onclick="syncData()">🔄 手动同步云端数据</button>
-            <button class="btn btn-light btn-full" onclick="backupData()">💾 本地数据备份</button>
-            <button class="btn btn-light btn-full" onclick="changeAccountPwd()">🔑 修改账号登录密码</button>
-            <button class="btn btn-danger btn-full" onclick="logout()">🚪 退出登录</button>
-        </div>
+  <div class="card">
+    <div class="card-title">🎯 她的档案</div>
+    <label>👧 昵称</label>
+    <input type="text" id="nickname" placeholder="宝贝/小乖">
+
+    <label>🎂 生日</label>
+    <input type="date" id="birthday">
+
+    <label>👋 相识日</label>
+    <input type="date" id="firstDay">
+
+    <label>🍬 喜欢</label>
+    <input type="text" id="like" placeholder="食物/爱好/礼物">
+
+    <label>🚫 忌口</label>
+    <input type="text" id="hate" placeholder="不吃/讨厌">
+
+    <label>✨ 习惯</label>
+    <input type="text" id="habit" placeholder="小习惯/口头禅">
+
+    <div class="card-title" style="margin-top:20px">📌 自定义</div>
+    <div id="customWrap"></div>
+    <button class="btn btn-light btn-full" onclick="addCustom()">➕ 添加</button>
+    <button class="btn btn-primary btn-full" onclick="saveProfile()">✅ 保存档案</button>
+  </div>
+</div>
+
+<!-- 设置 -->
+<div class="tab-content" id="tab4">
+  <div class="card">
+    <div class="card-title">⚙️ 主题设置</div>
+    <div class="filter-box">
+      <div class="filter-item active" onclick="setTheme('pink')">初恋粉</div>
     </div>
+  </div>
+  <div class="card">
+    <div class="card-title">🔒 安全设置</div>
+    <button class="btn btn-light btn-full" onclick="setLockPwd()">设置锁屏密码</button>
+    <button class="btn btn-light btn-full" onclick="setFakePwd()">设置伪装密码</button>
+  </div>
+  
+  <div class="card">
+    <div class="card-title">☁️ 数据管理</div>
+    <button class="btn btn-light btn-full" onclick="syncData()">同步云端</button>
+    <div style="height:12px;"></div> <!-- 增加间距 -->
+    <button class="btn btn-light btn-full" onclick="backupData()">备份数据</button>
+    <button class="btn btn-light btn-full" onclick="restoreData()">恢复数据</button>
+    <div style="height:12px;"></div> <!-- 增加间距 -->
+    <button class="btn btn-danger btn-full" onclick="clearAllData()">清空所有数据</button>
+  </div>
+  
+  <div class="card">
+    <div class="card-title">👤 账号</div>
+    <button class="btn btn-light btn-full" onclick="changePwd()">修改密码</button>
+    <button class="btn btn-danger btn-full" onclick="logout()">退出登录</button>
+  </div>
 </div>
 
 <script>
 // ==============================================
-// 🔴 请把这里替换成你自己的Firebase配置！
+// 🔥 1. 替换成你自己的 Firebase 配置
 // ==============================================
 const firebaseConfig = {
   apiKey: "AIzaSyCzKWM0DMQIQqr7-dXWQ8lP_FJHlf_nRKg",
@@ -298,13 +569,15 @@ const firebaseConfig = {
   measurementId: "G-5518PCMM0D"
 };
 
-// 初始化Firebase + 强制开启登录持久化
+// 初始化 Firebase
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
+// ==============================================
 // 全局变量
+// ==============================================
 let currentUser = null;
 let currentMood = "";
 let currentTab = 0;
@@ -312,574 +585,627 @@ let currentFilter = "all";
 let currentSort = "desc";
 let editRecordId = null;
 let currentPhotoBase64 = "";
-let resizeTimer = null;
-let scrollTimer = null;
+let resizeTimer, scrollTimer;
 
 // ==============================================
-// 核心工具函数
+// 2. 主题
 // ==============================================
-function getCurrentLocalTime() {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
+function setTheme(theme) {
+  document.body.setAttribute('data-theme', theme);
+  localStorage.setItem('THEME', theme);
+  showTip('✅ 主题已切换');
+}
+const savedTheme = localStorage.getItem('THEME') || 'pink';
+document.body.setAttribute('data-theme', savedTheme);
+
+// ==============================================
+// 3. 图片预览（缩放+双击）
+// ==============================================
+function openImgPreview(src) {
+  const img = document.getElementById('previewImg');
+  img.src = src;
+  img.style.transform = 'scale(1)';
+  document.getElementById('imgPreviewModal').style.display = 'flex';
+  let scale = 1, lastScale = 1, startX;
+  img.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      startX = Math.hypot(dx, dy);
+    }
+  });
+  img.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    if (e.touches.length === 2) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      scale = lastScale * (dist / startX);
+      scale = Math.max(1, Math.min(3, scale));
+      img.style.transform = `scale(${scale})`;
+    }
+  });
+  img.addEventListener('touchend', () => lastScale = scale);
+  img.addEventListener('dblclick', () => {
+    scale = scale === 1 ? 2 : 1;
+    lastScale = scale;
+    img.style.transform = `scale(${scale})`;
+  });
+}
+function closeImgPreview() {
+  document.getElementById('imgPreviewModal').style.display = 'none';
 }
 
 // ==============================================
-// 账号登录/注册/退出核心逻辑
+// 4. 登录状态监听
 // ==============================================
-auth.onAuthStateChanged((user) => {
-    if (user) {
-        currentUser = user;
-        document.getElementById("loginModal").style.display = "none";
-        document.querySelectorAll(".main-app-content").forEach(el=>el.style.display = "block");
-        document.getElementById("userStatus").innerText = `🟢 已登录 | ${user.email}`;
-        syncData();
+auth.onAuthStateChanged(user => {
+  if (user) {
+    currentUser = user;
+    document.getElementById("loginModal").style.display = "none";
+    document.querySelectorAll(".main-app-content").forEach(e => e.style.display = "block");
+    document.getElementById("userStatus").innerText = `🟢 ${user.email}`;
+    syncData(); // 登录后自动同步云端
+    initAll();
+  } else {
+    currentUser = null;
+    document.getElementById("loginModal").style.display = "flex";
+    document.querySelectorAll(".main-app-content").forEach(e => e.style.display = "none");
+  }
+});
+
+// ==============================================
+// 5. 登录 / 注册 / 退出
+// ==============================================
+function login() {
+  const e = document.getElementById("loginEmail").value.trim();
+  const p = document.getElementById("loginPwd").value.trim();
+  if (!e || p.length < 6) return showTip("密码≥6位");
+  auth.signInWithEmailAndPassword(e, p)
+    .then(() => showTip("✅ 登录成功"))
+    .catch(err => showTip("❌ " + err.message));
+}
+function register() {
+  const e = document.getElementById("loginEmail").value.trim();
+  const p = document.getElementById("loginPwd").value.trim();
+  if (!e || p.length < 6) return showTip("密码≥6位");
+  auth.createUserWithEmailAndPassword(e, p)
+    .then(() => showTip("✅ 注册成功"))
+    .catch(err => showTip("❌ " + err.message));
+}
+function logout() {
+  if (!confirm("确定退出？")) return;
+  auth.signOut();
+}
+
+// ==============================================
+// 6. 云端同步（核心）
+// ==============================================
+function syncData() {
+  if (!currentUser) return showTip("请先登录");
+  // 从云端拉取
+  db.ref('users/' + currentUser.uid).once('value').then(s => {
+    const d = s.val();
+    if (d) {
+      if (d.records) localStorage.setItem("RECORDS", JSON.stringify(Object.values(d.records)));
+      if (d.profile) localStorage.setItem("PROFILE", JSON.stringify(d.profile));
+      showTip("✅ 同步成功");
+      initAll();
     } else {
-        currentUser = null;
-        document.getElementById("loginModal").style.display = "flex";
-        document.querySelectorAll(".main-app-content").forEach(el=>el.style.display = "none");
+      // 云端无数据：上传本地
+      uploadLocalToCloud();
     }
-});
-
-function login(){
-    const email = document.getElementById("loginEmail").value.trim();
-    const pwd = document.getElementById("loginPwd").value.trim();
-    if(!email || !pwd){showTip("请填写完整的邮箱和密码");return;}
-    auth.signInWithEmailAndPassword(email, pwd)
-        .then(()=>{showTip("✅ 登录成功，正在同步数据");})
-        .catch((error)=>{showTip("登录失败：" + error.message);});
+  });
+}
+// 本地 → 云端
+function uploadLocalToCloud() {
+  if (!currentUser) return;
+  const records = JSON.parse(localStorage.getItem("RECORDS") || "[]");
+  const profile = JSON.parse(localStorage.getItem("PROFILE") || "{}");
+  const updates = {};
+  updates['users/' + currentUser.uid + '/profile'] = profile;
+  records.forEach(r => {
+    updates['users/' + currentUser.uid + '/records/' + r.id] = r;
+  });
+  db.ref().update(updates);
 }
 
-function register(){
-    const email = document.getElementById("loginEmail").value.trim();
-    const pwd = document.getElementById("loginPwd").value.trim();
-    if(!email || !pwd || pwd.length < 6){showTip("请填写邮箱和6位以上的密码");return;}
-    auth.createUserWithEmailAndPassword(email, pwd)
-        .then(()=>{showTip("✅ 注册成功，已自动登录");})
-        .catch((error)=>{showTip("注册失败：" + error.message);});
+// ==============================================
+// 7. 保存记录（自动同步云端）
+// ==============================================
+function saveRecord() {
+  const t = document.getElementById("recordType").value;
+  const m = document.getElementById("moodText").value.trim() || currentMood || "未填写";
+  const c = document.getElementById("recordContent").value.trim();
+  const q = document.getElementById("recordQuote").value.trim() || "无";
+  if (!c && !currentPhotoBase64) return showTip("写点内容或传图");
+
+  const time = editRecordId
+    ? (JSON.parse(localStorage.getItem("RECORDS") || "[]").find(x => x.id == editRecordId)?.time || getTime())
+    : getTime();
+
+  const rec = {
+    id: editRecordId || Date.now(),
+    time, type: t, mood: m, content: c, quote: q, photo: currentPhotoBase64
+  };
+
+  // 本地保存
+  let rs = JSON.parse(localStorage.getItem("RECORDS") || "[]");
+  if (editRecordId) {
+    const i = rs.findIndex(x => x.id == editRecordId);
+    if (i !== -1) rs[i] = rec;
+    showTip("✅ 修改成功");
+  } else {
+    rs.unshift(rec);
+    showTip("✅ 保存成功");
+    if (navigator.vibrate) navigator.vibrate(30);
+  }
+  localStorage.setItem("RECORDS", JSON.stringify(rs));
+
+  // 云端保存
+  if (currentUser) {
+    db.ref('users/' + currentUser.uid + '/records/' + rec.id).set(rec);
+  }
+
+  document.querySelector(".main-title").classList.add("heart");
+  setTimeout(() => document.querySelector(".main-title").classList.remove("heart"), 600);
+
+  clearDraft();
+  initAll();
 }
 
-function logout(){
-    if(!confirm("确定要退出登录吗？退出后需重新输入账号密码登录")) return;
-    auth.signOut().then(()=>{
-        localStorage.removeItem("RECORDS");
-        localStorage.removeItem("PROFILE");
-        localStorage.removeItem("DRAFT");
-        showTip("✅ 已退出登录");
-        window.location.reload();
+// ==============================================
+// 8. 删除记录（本地+云端）
+// ==============================================
+function deleteRecord(id) {
+  if (!confirm("确定删除？")) return;
+  // 本地
+  let rs = JSON.parse(localStorage.getItem("RECORDS") || "[]");
+  rs = rs.filter(x => x.id != id);
+  localStorage.setItem("RECORDS", JSON.stringify(rs));
+  // 云端
+  if (currentUser) {
+    db.ref('users/' + currentUser.uid + '/records/' + id).remove();
+  }
+  showTip("🗑️ 已删除");
+  initAll();
+}
+
+// ==============================================
+// 9. 保存档案（本地+云端）
+// ==============================================
+function saveProfile() {
+  const p = {
+    name: document.getElementById("nickname").value.trim(),
+    birth: document.getElementById("birthday").value,
+    first: document.getElementById("firstDay").value,
+    like: document.getElementById("like").value.trim(),
+    hate: document.getElementById("hate").value.trim(),
+    habit: document.getElementById("habit").value.trim(),
+    custom: []
+  };
+  document.querySelectorAll(".custom-item").forEach(i => {
+    p.custom.push({
+      k: i.querySelector(".cKey").value,
+      v: i.querySelector(".cVal").value
     });
-}
-
-function changeAccountPwd(){
-    const oldPwd = prompt("请输入当前账号密码：");
-    if(!oldPwd) return;
-    const user = auth.currentUser;
-    const credential = firebase.auth.EmailAuthProvider.credential(user.email, oldPwd);
-    user.reauthenticateWithCredential(credential)
-        .then(()=>{
-            const newPwd = prompt("请输入新密码（6位以上）：");
-            if(newPwd && newPwd.length >=6){
-                user.updatePassword(newPwd).then(()=>{
-                    showTip("✅ 账号密码修改成功");
-                }).catch((error)=>{
-                    showTip("修改失败：" + error.message);
-                });
-            }else if(newPwd !== null){
-                showTip("密码长度不能少于6位");
-            }
-        })
-        .catch(()=>{
-            showTip("当前密码错误，无法修改");
-        });
+  });
+  localStorage.setItem("PROFILE", JSON.stringify(p));
+  if (currentUser) {
+    db.ref('users/' + currentUser.uid + '/profile').set(p);
+  }
+  document.getElementById("girlName").innerText = p.name || "我的女孩";
+  updateStats();
+  showTip("✅ 档案已保存");
 }
 
 // ==============================================
-// 云端数据同步逻辑
+// 10. 工具函数（时间、字数、上传、初始化等）
 // ==============================================
-function syncData(){
-    if(!currentUser){showTip("请先登录账号");return;}
-    db.ref('users/' + currentUser.uid).once('value')
-        .then((snapshot)=>{
-            const data = snapshot.val();
-            if(data){
-                if(data.records) localStorage.setItem("RECORDS", JSON.stringify(Object.values(data.records)));
-                if(data.profile) localStorage.setItem("PROFILE", JSON.stringify(data.profile));
-                showTip("✅ 云端数据同步成功");
-                initApp();
-            }else{
-                uploadLocalData();
-            }
-        })
-        .catch((error)=>{
-            showTip("同步失败：" + error.message);
-        });
+function getTime() {
+  const now = new Date();
+  const y = now.getFullYear(), m = String(now.getMonth()+1).padStart(2,'0'), d = String(now.getDate()).padStart(2,'0');
+  const h = String(now.getHours()).padStart(2,'0'), i = String(now.getMinutes()).padStart(2,'0');
+  return `${y}-${m}-${d}T${h}:${i}`;
 }
-
-function uploadLocalData(){
-    if(!currentUser) return;
-    const records = JSON.parse(localStorage.getItem("RECORDS") || "[]");
-    const profile = JSON.parse(localStorage.getItem("PROFILE") || "{}");
-    const updates = {};
-    updates['users/' + currentUser.uid + '/profile'] = profile;
-    records.forEach(record=>{
-        updates['users/' + currentUser.uid + '/records/' + record.id] = record;
-    });
-    db.ref().update(updates)
-        .then(()=>{showTip("✅ 本地数据已同步到云端");})
-        .catch((error)=>{showTip("同步失败：" + error.message);});
-}
-
-// ==============================================
-// 完美优化：输入法遮挡适配（针对写记录页）
-// ==============================================
-const originHeight = window.innerHeight;
-window.addEventListener("resize", () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
-        const currentHeight = window.innerHeight;
-        if (currentHeight < originHeight - 120) {
-            document.body.classList.add("keyboard-open");
-            // 核心优化：输入法弹出后，自动滚动到当前聚焦的输入框
-            setTimeout(() => {
-                const activeEl = document.activeElement;
-                if (activeEl.classList.contains("keyboard-scroll-target")) {
-                    activeEl.scrollIntoView({ behavior: "smooth", block: "center" });
-                    window.scrollBy(0, 40); // 额外留一点空间，避免完全贴边
-                }
-            }, 300);
-        } else {
-            document.body.classList.remove("keyboard-open");
-        }
-    }, 200);
-});
-
-// 额外优化：输入框获取焦点时，也主动触发滚动
-document.querySelectorAll(".keyboard-scroll-target").forEach(el => {
-    el.addEventListener("focus", () => {
-        clearTimeout(scrollTimer);
-        scrollTimer = setTimeout(() => {
-            el.scrollIntoView({ behavior: "smooth", block: "center" });
-            window.scrollBy(0, 40);
-        }, 200);
-    });
-});
-
-// ==============================================
-// 核心功能逻辑
-// ==============================================
-// 字数统计
 function updateWordCount() {
-    const c1 = document.getElementById("recordContent").value.length;
-    const c2 = document.getElementById("recordQuote").value.length;
-    document.getElementById("wordCount1").innerText = c1 + " 字";
-    document.getElementById("wordCount2").innerText = c2 + " 字";
+  const a = document.getElementById("recordContent").value.length;
+  const b = document.getElementById("recordQuote").value.length;
+  document.getElementById("wordCount1").innerText = a + " 字";
+  document.getElementById("wordCount2").innerText = b + " 字";
 }
-
-// 图片上传处理
-function handlePhotoUpload(event){
-    const file = event.target.files[0];
-    if(!file) return;
-    if(file.size > 6 * 1024 * 1024){
-        showTip("图片建议小于6MB，避免同步失败");
-        return;
-    }
-    const reader = new FileReader();
-    reader.onload = function(e){
-        currentPhotoBase64 = e.target.result;
-        const wrap = document.getElementById("photoPreviewWrap");
-        wrap.innerHTML = `
-            <img src="${currentPhotoBase64}" class="photo-preview">
-            <button class="photo-remove" onclick="removePhoto()">删除图片</button>
-        `;
-    };
-    reader.readAsDataURL(file);
+function handlePhotoUpload(e) {
+  const f = e.target.files[0];
+  if (!f) return;
+  if (f.size > 6 * 1024 * 1024) return showTip("图片≤6MB");
+  const r = new FileReader();
+  r.onload = e => {
+    currentPhotoBase64 = e.target.result;
+    document.getElementById("photoPreviewWrap").innerHTML = `
+      <img src="${currentPhotoBase64}" class="photo-preview">
+      <button class="photo-remove" onclick="removePhoto()">删除</button>
+    `;
+  };
+  r.readAsDataURL(f);
 }
-
-function removePhoto(){
-    currentPhotoBase64 = "";
-    document.getElementById("photoPreviewWrap").innerHTML = "";
-    document.getElementById("photoInput").value = "";
+function removePhoto() {
+  currentPhotoBase64 = "";
+  document.getElementById("photoPreviewWrap").innerHTML = "";
 }
-
-// 初始化APP
-function initApp(){
-    loadProfile();
-    showRecords();
-    updateStats();
-    loadDraft();
-    updateWordCount();
-
-    document.getElementById("recordContent").addEventListener("input", saveDraft);
-    document.getElementById("recordQuote").addEventListener("input", saveDraft);
-    document.getElementById("moodText").addEventListener("input", saveDraft);
+function initAll() {
+  loadProfile();
+  showRecords();
+  renderTimeline();
+  renderCalendar();
+  renderMoodChart();
+  updateStats();
+  loadDraft();
+  updateWordCount();
 }
-
-// 标签切换
-function switchTab(index){
-    currentTab = index;
-    document.querySelectorAll(".tab").forEach((t,i)=>t.classList.toggle("active",i===index));
-    document.querySelectorAll(".tab-content").forEach((c,i)=>c.classList.toggle("active",i===index));
-    if(index === 1) showRecords();
-    if(index === 2) loadProfile();
-    window.scrollTo({top:0,behavior:"smooth"});
+function switchTab(i) {
+  currentTab = i;
+  document.querySelectorAll(".tab").forEach((t, j) => t.classList.toggle("active", j === i));
+  document.querySelectorAll(".tab-content").forEach((c, j) => c.classList.toggle("active", j === i));
+  if (i === 1) showRecords();
+  if (i === 2) { renderTimeline(); renderCalendar(); renderMoodChart(); }
+  if (i === 3) loadProfile();
+  window.scrollTo(0, 0);
 }
-
-// 快捷心情选择
-function selectMood(el,text){
-    document.querySelectorAll(".mood-item").forEach(i=>i.classList.remove("active"));
-    el.classList.add("active");
-    currentMood = text;
-    document.getElementById("moodText").value = text;
-    saveDraft();
+function selectMood(el, t) {
+  document.querySelectorAll(".mood-item").forEach(i => i.classList.remove("active"));
+  el.classList.add("active");
+  currentMood = t;
+  document.getElementById("moodText").value = t;
+  saveDraft();
 }
-
-// 记录筛选/排序/搜索
-function filterRecord(el,type){
-    document.querySelectorAll(".filter-item").forEach(i=>i.classList.remove("active"));
-    el.classList.add("active");
-    currentFilter = type;
-    showRecords();
+function filterRecord(el, t) {
+  currentFilter = t;
+  document.querySelectorAll(".filter-item").forEach(i => i.classList.remove("active"));
+  el.classList.add("active");
+  showRecords();
 }
-
-function sortRecord(el,type){
-    document.querySelectorAll(".sort-item").forEach(i=>i.classList.remove("active"));
-    el.classList.add("active");
-    currentSort = type;
-    showRecords();
+function sortRecord(el, t) {
+  currentSort = t;
+  document.querySelectorAll(".sort-item").forEach(i => i.classList.remove("active"));
+  el.classList.add("active");
+  showRecords();
 }
-
-function searchRecord(){
-    showRecords();
+function searchRecord() {
+  showRecords();
 }
-
-// 草稿自动保存/加载
-function saveDraft(){
-    const draft = {
-        type: document.getElementById("recordType").value,
-        mood: document.getElementById("moodText").value,
-        content: document.getElementById("recordContent").value,
-        quote: document.getElementById("recordQuote").value,
-        photo: currentPhotoBase64
-    };
-    localStorage.setItem("DRAFT", JSON.stringify(draft));
-    updateWordCount();
+function saveDraft() {
+  localStorage.setItem("DRAFT", JSON.stringify({
+    type: document.getElementById("recordType").value,
+    mood: document.getElementById("moodText").value,
+    content: document.getElementById("recordContent").value,
+    quote: document.getElementById("recordQuote").value,
+    photo: currentPhotoBase64
+  }));
 }
-
-function loadDraft(){
-    const draft = JSON.parse(localStorage.getItem("DRAFT") || "{}");
-    if(draft.type) document.getElementById("recordType").value = draft.type;
-    if(draft.mood) document.getElementById("moodText").value = draft.mood;
-    if(draft.content) document.getElementById("recordContent").value = draft.content;
-    if(draft.quote) document.getElementById("recordQuote").value = draft.quote;
-    if(draft.photo){
-        currentPhotoBase64 = draft.photo;
-        document.getElementById("photoPreviewWrap").innerHTML = `
-            <img src="${currentPhotoBase64}" class="photo-preview">
-            <button class="photo-remove" onclick="removePhoto()">删除图片</button>
-        `;
-    }
-    updateWordCount();
+function loadDraft() {
+  const d = JSON.parse(localStorage.getItem("DRAFT") || "{}");
+  if (d.type) document.getElementById("recordType").value = d.type;
+  if (d.mood) document.getElementById("moodText").value = d.mood;
+  if (d.content) document.getElementById("recordContent").value = d.content;
+  if (d.quote) document.getElementById("recordQuote").value = d.quote;
+  if (d.photo) {
+    currentPhotoBase64 = d.photo;
+    document.getElementById("photoPreviewWrap").innerHTML = `
+      <img src="${currentPhotoBase64}" class="photo-preview">
+      <button class="photo-remove" onclick="removePhoto()">删除</button>
+    `;
+  }
+  updateWordCount();
 }
-
-function clearDraft(){
-    localStorage.removeItem("DRAFT");
-    document.getElementById("moodText").value = "";
-    document.getElementById("recordContent").value = "";
-    document.getElementById("recordQuote").value = "";
-    document.querySelectorAll(".mood-item").forEach(i=>i.classList.remove("active"));
-    currentMood = "";
-    editRecordId = null;
-    currentPhotoBase64 = "";
-    document.getElementById("photoPreviewWrap").innerHTML = "";
-    document.getElementById("photoInput").value = "";
-    document.getElementById("recordType").selectedIndex = 0;
-    updateWordCount();
+function clearDraft() {
+  localStorage.removeItem("DRAFT");
+  document.getElementById("moodText").value = "";
+  document.getElementById("recordContent").value = "";
+  document.getElementById("recordQuote").value = "";
+  document.querySelectorAll(".mood-item").forEach(i => i.classList.remove("active"));
+  currentMood = "";
+  editRecordId = null;
+  currentPhotoBase64 = "";
+  document.getElementById("photoPreviewWrap").innerHTML = "";
+  document.getElementById("recordType").selectedIndex = 0;
+  updateWordCount();
 }
-
-// 档案自定义字段
-function addCustom(){
-    const wrap = document.getElementById("customWrap");
+function addCustom() {
+  const wrap = document.getElementById("customWrap");
+  const div = document.createElement("div");
+  div.className = "custom-item";
+  div.innerHTML = `
+    <input placeholder="名称" class="cKey">
+    <input placeholder="内容" class="cVal">
+    <button class="del-custom-btn" onclick="this.parentElement.remove()">×</button>
+  `;
+  wrap.appendChild(div);
+}
+function loadProfile() {
+  const p = JSON.parse(localStorage.getItem("PROFILE") || "{}");
+  document.getElementById("nickname").value = p.name || "";
+  document.getElementById("birthday").value = p.birth || "";
+  document.getElementById("firstDay").value = p.first || "";
+  document.getElementById("like").value = p.like || "";
+  document.getElementById("hate").value = p.hate || "";
+  document.getElementById("habit").value = p.habit || "";
+  document.getElementById("girlName").innerText = p.name || "我的女孩";
+  const wrap = document.getElementById("customWrap");
+  wrap.innerHTML = "";
+  (p.custom || []).forEach(i => {
     const div = document.createElement("div");
     div.className = "custom-item";
     div.innerHTML = `
-        <input placeholder="名称" class="cKey">
-        <input placeholder="内容" class="cVal">
-        <button class="del-custom-btn" onclick="this.parentElement.remove()">×</button>
+      <input value="${i.k}" class="cKey">
+      <input value="${i.v}" class="cVal">
+      <button class="del-custom-btn" onclick="this.parentElement.remove()">×</button>
     `;
     wrap.appendChild(div);
+  });
 }
+function editRecord(id) {
+  const rs = JSON.parse(localStorage.getItem("RECORDS") || "[]");
+  const r = rs.find(x => x.id == id);
+  if (!r) return;
+  document.getElementById("recordType").value = r.type;
+  document.getElementById("moodText").value = r.mood;
+  document.getElementById("recordContent").value = r.content;
+  document.getElementById("recordQuote").value = r.quote;
+  if (r.photo) {
+    currentPhotoBase64 = r.photo;
+    document.getElementById("photoPreviewWrap").innerHTML = `
+      <img src="${currentPhotoBase64}" class="photo-preview">
+      <button class="photo-remove" onclick="removePhoto()">删除</button>
+    `;
+  } else {
+    currentPhotoBase64 = "";
+    document.getElementById("photoPreviewWrap").innerHTML = "";
+  }
+  editRecordId = id;
+  switchTab(0);
+}
+function copyRecord(c, q) {
+  const txt = `💌 故事：${c}\n💬 语录：${q}`;
+  navigator.clipboard.writeText(txt).then(() => showTip("✅ 复制成功")).catch(() => alert(txt));
+}
+function showRecords() {
+  const rs = JSON.parse(localStorage.getItem("RECORDS") || "[]");
+  const box = document.getElementById("recordBox");
+  const key = (document.getElementById("searchInput")?.value.trim().toLowerCase() || "");
 
-// 保存档案
-function saveProfile(){
-    const profile = {
-        name: document.getElementById("nickname").value.trim(),
-        birth: document.getElementById("birthday").value,
-        first: document.getElementById("firstDay").value,
-        like: document.getElementById("like").value.trim(),
-        hate: document.getElementById("hate").value.trim(),
-        habit: document.getElementById("habit").value.trim(),
-        custom: []
-    };
-    document.querySelectorAll(".custom-item").forEach(item=>{
-        profile.custom.push({
-            k: item.querySelector(".cKey").value.trim(),
-            v: item.querySelector(".cVal").value.trim()
-        });
+  if (rs.length === 0) {
+    box.innerHTML = '<div class="empty">还没有记录哦💕</div>';
+    return;
+  }
+
+  let f = currentFilter === "all" ? rs : rs.filter(x => x.type === currentFilter);
+  if (key) {
+    f = f.filter(x =>
+      (x.content || "").toLowerCase().includes(key) ||
+      (x.quote || "").toLowerCase().includes(key) ||
+      (x.mood || "").toLowerCase().includes(key)
+    );
+  }
+  if (currentSort === "asc") f = [...f].reverse();
+
+  if (f.length === 0) {
+    box.innerHTML = '<div class="empty">没有找到匹配的回忆</div>';
+    return;
+  }
+
+  let h = "";
+  f.forEach(x => {
+    h += `
+      <div class="record-item">
+        <div class="record-time">📅 ${x.time.replace("T", " ")}</div>
+        <div class="record-type">${x.type}</div>
+        <div class="record-text">😊 ${x.mood}</div>
+        <div class="record-text">💌 ${x.content || "无"}</div>
+        <div class="record-text">💬 ${x.quote || "无"}</div>
+        ${x.photo ? `<img src="${x.photo}" class="record-photo" onclick="openImgPreview('${x.photo}')">` : ""}
+        <div class="record-op">
+          <button class="op-btn edit" onclick="editRecord(${x.id})">编辑</button>
+          <button class="op-btn" onclick="copyRecord('${x.content?.replace(/'/g, "\\'") || ""}', '${x.quote?.replace(/'/g, "\\'") || ""}')">复制</button>
+          <button class="op-btn danger" onclick="deleteRecord(${x.id})">删除</button>
+        </div>
+      </div>
+    `;
+  });
+  box.innerHTML = h;
+}
+function updateStats() {
+  const rs = JSON.parse(localStorage.getItem("RECORDS") || "[]");
+  document.getElementById("totalNum").innerText = rs.length;
+
+  const p = JSON.parse(localStorage.getItem("PROFILE") || "{}");
+  if (p.first) {
+    const fd = new Date(p.first);
+    const td = new Date();
+    const d1 = new Date(fd.getFullYear(), fd.getMonth(), fd.getDate());
+    const d2 = new Date(td.getFullYear(), td.getMonth(), td.getDate());
+    const days = Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24));
+    document.getElementById("loveDay").innerText = days >= 0 ? days : 0;
+  } else {
+    document.getElementById("loveDay").innerText = 0;
+  }
+  if (p.birth) {
+    const bd = new Date(p.birth);
+    const now = new Date();
+    bd.setFullYear(now.getFullYear());
+    if (bd < now) bd.setFullYear(now.getFullYear() + 1);
+    const days = Math.ceil((bd - now) / (1000 * 60 * 60 * 24));
+    document.getElementById("nextDay").innerText = days;
+  } else {
+    document.getElementById("nextDay").innerText = 0;
+  }
+}
+function renderTimeline() {
+  const rs = JSON.parse(localStorage.getItem("RECORDS") || "[]");
+  const box = document.getElementById("timelineBox");
+  if (rs.length === 0) {
+    box.innerHTML = '<div class="empty">暂无回忆</div>';
+    return;
+  }
+  const sorted = [...rs].sort((a, b) => new Date(a.time) - new Date(b.time));
+  const yearMap = {};
+  sorted.forEach(r => {
+    const year = r.time.split("-")[0];
+    if (!yearMap[year]) yearMap[year] = [];
+    yearMap[year].push(r);
+  });
+  let h = "";
+  Object.keys(yearMap).sort().forEach(year => {
+    h += `<div class="timeline-year">${year}年</div><div class="timeline-line">`;
+    yearMap[year].forEach(r => {
+      h += `
+        <div class="timeline-item">
+          <div class="timeline-date">${r.time.replace("T", " ")}</div>
+          <div class="timeline-content">
+            <div style="color:var(--theme-primary);font-weight:500;">${r.type}</div>
+            <div style="margin:4px 0;">${r.content || "无"}</div>
+            ${r.photo ? `<img src="${r.photo}" style="max-width:100%;border-radius:8px;margin-top:6px;">` : ""}
+          </div>
+        </div>
+      `;
     });
-    localStorage.setItem("PROFILE", JSON.stringify(profile));
-    if(currentUser){
-        db.ref('users/' + currentUser.uid + '/profile').set(profile)
-            .then(()=>{showTip("✅ 档案保存成功，已同步云端");})
-            .catch(()=>{showTip("✅ 档案已本地保存，云端同步失败");});
-    }else{
-        showTip("✅ 档案已本地保存，登录后可同步云端");
+    h += "</div>";
+  });
+  box.innerHTML = h;
+}
+function renderCalendar() {
+  const box = document.getElementById("calendarBox");
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  let h = "";
+  for (let i = 0; i < firstDay; i++) h += `<div class="calendar-day"></div>`;
+  for (let d = 1; d <= daysInMonth; d++) {
+    h += `<div class="calendar-day">${d}</div>`;
+  }
+  box.innerHTML = h;
+}
+function renderMoodChart() {
+  const rs = JSON.parse(localStorage.getItem("RECORDS") || "[]");
+  const moodCount = {};
+  rs.forEach(r => {
+    const m = r.mood || "未填写";
+    moodCount[m] = (moodCount[m] || 0) + 1;
+  });
+  const ctx = document.getElementById("moodChart").getContext("2d");
+  if (window.moodChartInstance) window.moodChartInstance.destroy();
+  window.moodChartInstance = new Chart(ctx, {
+    type: "pie",
+    data: {
+      labels: Object.keys(moodCount),
+      datasets: [{
+        data: Object.values(moodCount),
+        backgroundColor: ["#ec407a","#42a5f5","#66bb6a","#ffa726","#7e57c2","#26a69a","#ef5350"]
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+}
+function exportPdf() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const content = document.getElementById("recordBox");
+  html2canvas(content).then(canvas => {
+    const img = canvas.toDataURL("image/png");
+    const imgWidth = 210;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    doc.addImage(img, "PNG", 0, 0, imgWidth, imgHeight);
+    doc.save("与她的回忆.pdf");
+  });
+}
+function exportImage() {
+  const content = document.getElementById("recordBox");
+  html2canvas(content, { useCORS: true }).then(canvas => {
+    const a = document.createElement("a");
+    a.href = canvas.toDataURL("image/png");
+    a.download = "与她的回忆.png";
+    a.click();
+  });
+}
+function backupData() {
+  const data = {
+    records: localStorage.getItem("RECORDS"),
+    profile: localStorage.getItem("PROFILE"),
+    draft: localStorage.getItem("DRAFT")
+  };
+  navigator.clipboard.writeText(JSON.stringify(data)).then(() => showTip("✅ 备份已复制"));
+}
+function restoreData() {
+  const data = prompt("粘贴备份内容：");
+  if (!data) return;
+  try {
+    const d = JSON.parse(data);
+    if (d.records) localStorage.setItem("RECORDS", d.records);
+    if (d.profile) localStorage.setItem("PROFILE", d.profile);
+    if (d.draft) localStorage.setItem("DRAFT", d.draft);
+    showTip("✅ 恢复成功");
+    initAll();
+  } catch (e) {
+    showTip("❌ 格式错误");
+  }
+}
+function clearAllData() {
+  if (!confirm("确定清空所有数据？不可恢复！")) return;
+  localStorage.clear();
+  if (currentUser) {
+    db.ref('users/' + currentUser.uid).remove();
+  }
+  showTip("🗑️ 已清空");
+  location.reload();
+}
+function changePwd() {
+  const old = prompt("当前密码：");
+  if (!old) return;
+  const cred = firebase.auth.EmailAuthProvider.credential(currentUser.email, old);
+  currentUser.reauthenticateWithCredential(cred).then(() => {
+    const np = prompt("新密码（≥6位）：");
+    if (np && np.length >= 6) {
+      currentUser.updatePassword(np).then(() => showTip("✅ 修改成功"));
     }
-    document.getElementById("girlName").innerText = profile.name || "我的女孩";
-    updateStats();
+  }).catch(() => showTip("原密码错误"));
+}
+function setLockPwd() {
+  const p = prompt("设置锁屏密码（4位以上）：");
+  if (p && p.length >= 4) {
+    localStorage.setItem("LOCK_PWD", p);
+    showTip("✅ 已设置");
+  }
+}
+function setFakePwd() {
+  const p = prompt("设置伪装密码：");
+  if (p && p.length >= 4) {
+    localStorage.setItem("FAKE_PWD", p);
+    showTip("✅ 已设置");
+  }
+}
+function showTip(t) {
+  const m = document.createElement("div");
+  m.className = "modal";
+  m.innerHTML = `<div class="modal-card"><div class="modal-title">${t}</div></div>`;
+  document.body.appendChild(m);
+  setTimeout(() => m.remove(), 1400);
 }
 
-// 加载档案
-function loadProfile(){
-    const profile = JSON.parse(localStorage.getItem("PROFILE") || "{}");
-    document.getElementById("nickname").value = profile.name || "";
-    document.getElementById("birthday").value = profile.birth || "";
-    document.getElementById("firstDay").value = profile.first || "";
-    document.getElementById("like").value = profile.like || "";
-    document.getElementById("hate").value = profile.hate || "";
-    document.getElementById("habit").value = profile.habit || "";
-    document.getElementById("girlName").innerText = profile.name || "我的女孩";
-    const wrap = document.getElementById("customWrap");
-    wrap.innerHTML = "";
-    (profile.custom || []).forEach(item=>{
-        const div = document.createElement("div");
-        div.className = "custom-item";
-        div.innerHTML = `
-            <input value="${item.k}" class="cKey">
-            <input value="${item.v}" class="cVal">
-            <button class="del-custom-btn" onclick="this.parentElement.remove()">×</button>
-        `;
-        wrap.appendChild(div);
-    });
-}
-
-// ==============================================
-// 核心：保存记录（自动记录时间）
-// ==============================================
-function saveRecord(){
-    const type = document.getElementById("recordType").value;
-    const mood = document.getElementById("moodText").value.trim() || currentMood || "未填写";
-    const content = document.getElementById("recordContent").value.trim();
-    const quote = document.getElementById("recordQuote").value.trim() || "无";
-
-    if(!content && !currentPhotoBase64){
-        showTip("请填写内容或上传图片哦");
-        return;
+// 键盘适配
+const oh = window.innerHeight;
+window.addEventListener("resize", () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    const ch = window.innerHeight;
+    if (ch < oh - 120) {
+      document.body.classList.add("keyboard-open");
+    } else {
+      document.body.classList.remove("keyboard-open");
     }
-
-    let recordTime;
-    if(editRecordId){
-        const records = JSON.parse(localStorage.getItem("RECORDS") || "[]");
-        const originRecord = records.find(item=>item.id === editRecordId);
-        recordTime = originRecord ? originRecord.time : getCurrentLocalTime();
-    }else{
-        recordTime = getCurrentLocalTime();
-    }
-
-    const record = {
-        id: editRecordId || Date.now(),
-        time: recordTime,
-        type: type,
-        mood: mood,
-        content: content,
-        quote: quote,
-        photo: currentPhotoBase64
-    };
-
-    const records = JSON.parse(localStorage.getItem("RECORDS") || "[]");
-    if(editRecordId){
-        const index = records.findIndex(item=>item.id === editRecordId);
-        if(index !== -1) records[index] = record;
-        showTip("✅ 记录编辑成功");
-    }else{
-        records.unshift(record);
-        showTip("✅ 记录保存成功");
-        if(navigator.vibrate) navigator.vibrate(50);
-    }
-    localStorage.setItem("RECORDS", JSON.stringify(records));
-
-    if(currentUser){
-        db.ref('users/' + currentUser.uid + '/records/' + record.id).set(record)
-            .catch(()=>{});
-    }
-
-    document.querySelector(".main-title").classList.add("heart");
-    setTimeout(()=>document.querySelector(".main-title").classList.remove("heart"),600);
-    clearDraft();
-    showRecords();
-    updateStats();
-}
-
-// 编辑记录
-function editRecord(id){
-    const records = JSON.parse(localStorage.getItem("RECORDS") || "[]");
-    const record = records.find(item=>item.id === id);
-    if(!record) return;
-
-    document.getElementById("recordType").value = record.type;
-    document.getElementById("moodText").value = record.mood;
-    document.getElementById("recordContent").value = record.content;
-    document.getElementById("recordQuote").value = record.quote;
-
-    if(record.photo){
-        currentPhotoBase64 = record.photo;
-        document.getElementById("photoPreviewWrap").innerHTML = `
-            <img src="${currentPhotoBase64}" class="photo-preview">
-            <button class="photo-remove" onclick="removePhoto()">删除图片</button>
-        `;
-    }else{
-        currentPhotoBase64 = "";
-        document.getElementById("photoPreviewWrap").innerHTML = "";
-    }
-    editRecordId = id;
-    switchTab(0);
-    window.scrollTo({top:0,behavior:"smooth"});
-    updateWordCount();
-}
-
-// 复制记录
-function copyRecord(content, quote){
-    const text = `💌 故事：${content}\n💬 语录：${quote}`;
-    navigator.clipboard.writeText(text).then(()=>{
-        showTip("✅ 复制成功");
-    }).catch(()=>{
-        alert("可复制内容：\n"+text);
-    });
-}
-
-// 展示记录
-function showRecords(){
-    const records = JSON.parse(localStorage.getItem("RECORDS") || "[]");
-    const box = document.getElementById("recordBox");
-    const searchKey = (document.getElementById("searchInput")?.value.trim().toLowerCase() || "");
-    if(records.length === 0){
-        box.innerHTML = '<div class="empty">暂无记录，快去写下第一条属于你们的回忆吧💕</div>';
-        return;
-    }
-    let filterRecords = currentFilter === "all" ? records : records.filter(item=>item.type === currentFilter);
-    if(searchKey){
-        filterRecords = filterRecords.filter(item=>
-            (item.content && item.content.toLowerCase().includes(searchKey)) ||
-            (item.quote && item.quote.toLowerCase().includes(searchKey)) ||
-            (item.mood && item.mood.toLowerCase().includes(searchKey))
-        );
-    }
-    if(currentSort === "asc") filterRecords = [...filterRecords].reverse();
-    if(filterRecords.length === 0){
-        box.innerHTML = '<div class="empty">没有找到对应的记录哦</div>';
-        return;
-    }
-    let html = "";
-    filterRecords.forEach(item=>{
-        html += `
-        <div class="record-item">
-            <div class="record-time">📅 ${item.time.replace("T"," ")}</div>
-            <div class="record-type">${item.type}</div>
-            <div class="record-text">😊 心情：${item.mood}</div>
-            <div class="record-text">💌 故事：${item.content || "无"}</div>
-            <div class="record-text">💬 语录：${item.quote || "无"}</div>
-            ${item.photo ? `<img src="${item.photo}" class="record-photo" onclick="window.open('${item.photo}')">` : ""}
-            <div class="record-op">
-                <button class="op-btn edit" onclick="editRecord(${item.id})">编辑</button>
-                <button class="op-btn" onclick="copyRecord('${item.content}','${item.quote}')">复制</button>
-            </div>
-        </div>`;
-    });
-    box.innerHTML = html;
-}
-
-// 删除单条记录
-function delRecord(id){
-    if(!confirm("确定要删除这条记录吗？删除后无法恢复哦")) return;
-    const records = JSON.parse(localStorage.getItem("RECORDS") || "[]");
-    const newRecords = records.filter(item=>item.id !== id);
-    localStorage.setItem("RECORDS", JSON.stringify(newRecords));
-    if(currentUser){
-        db.ref('users/' + currentUser.uid + '/records/' + id).remove().catch(()=>{});
-    }
-    showRecords();
-    updateStats();
-    showTip("删除成功");
-}
-
-// ==============================================
-// 核心优化：陪伴天数算法（当日-相识日）
-// ==============================================
-function updateStats(){
-    const records = JSON.parse(localStorage.getItem("RECORDS") || "[]");
-    document.getElementById("totalNum").innerText = records.length;
-    const profile = JSON.parse(localStorage.getItem("PROFILE") || "{}");
-    
-    // 优化陪伴天数算法：当日-相识日，比如4月10日-4月4日=6天
-    if(profile.first){
-        // 只取日期部分，忽略时间，避免时区问题
-        const firstDate = new Date(profile.first);
-        const firstDay = new Date(firstDate.getFullYear(), firstDate.getMonth(), firstDate.getDate());
-        
-        const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        
-        // 核心算法：(今日-相识日) / (1000*60*60*24)，直接取整
-        const dayDiff = Math.ceil((today - firstDay) / (1000 * 60 * 60 * 24));
-        document.getElementById("loveDay").innerText = dayDiff >= 0 ? dayDiff : 0;
-    }else{
-        document.getElementById("loveDay").innerText = 0;
-    }
-    
-    // 生日倒计时
-    if(profile.birth){
-        const birthDay = new Date(profile.birth);
-        const now = new Date();
-        birthDay.setFullYear(now.getFullYear());
-        if(birthDay < now) birthDay.setFullYear(now.getFullYear() + 1);
-        const dayDiff = Math.ceil((birthDay - now) / (1000 * 60 * 60 * 24));
-        document.getElementById("nextDay").innerText = dayDiff;
-    }else{
-        document.getElementById("nextDay").innerText = 0;
-    }
-}
-
-// 护眼模式
-function toggleDark(){
-    document.body.classList.toggle("dark");
-    showTip(document.body.classList.contains("dark") ? "已开启护眼模式" : "已关闭护眼模式");
-}
-
-// 本地数据备份
-function backupData(){
-    const backupData = {
-        records: localStorage.getItem("RECORDS"),
-        profile: localStorage.getItem("PROFILE")
-    };
-    const backupStr = JSON.stringify(backupData);
-    navigator.clipboard.writeText(backupStr).then(()=>{
-        showTip("✅ 备份数据已复制到剪贴板");
-    }).catch(()=>{
-        alert("备份数据：\n" + backupStr);
-    });
-}
-
-// 全局提示
-function showTip(text){
-    const modal = document.createElement("div");
-    modal.className = "modal";
-    modal.innerHTML = `<div class="modal-card"><div class="modal-title">${text}</div></div>`;
-    document.body.appendChild(modal);
-    setTimeout(()=>modal.remove(),1600);
-}
+  }, 150);
+});
 </script>
 </body>
 </html>
