@@ -4,11 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>💌 与她的点点滴滴</title>
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-<!-- 第三方库 -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
@@ -18,7 +13,7 @@
   --theme-light: #fce4ec;
   --theme-dark: #c2185b;
   --theme-gradient: linear-gradient(135deg, #fff0f5, #fef4f8, #ffeaf2);
-  --card-bg: rgba(255,255,255,0.96);
+  --card-bg: rgba(255,255,255,0.97);
   --text-main: #333;
   --text-sub: #666;
   --text-desc: #888;
@@ -44,9 +39,6 @@ body {
   transition: all 0.3s ease;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-}
-body.keyboard-open {
-  padding-bottom: calc(65vh + 40px) !important;
 }
 
 /* 模态框 */
@@ -91,6 +83,7 @@ body.keyboard-open {
   position: fixed; inset: 0; background: rgba(0,0,0,0.95);
   z-index: 99999; display: flex; align-items: center;
   justify-content: center; padding: 10px; touch-action: pan-x pan-y;
+  display: none;
 }
 #previewImg {
   max-width: 100%; max-height: 90vh; object-fit: contain;
@@ -114,9 +107,6 @@ body.keyboard-open {
   font-size: 18px; color: var(--theme-primary); font-weight: 600;
   margin-top: 6px;
 }
-#userStatus {
-  font-size: 12px; color: var(--text-desc); margin-top: 4px;
-}
 .sub-title { font-size: 13px; color: var(--text-desc); margin-top: 4px; }
 
 /* 统计 */
@@ -127,9 +117,7 @@ body.keyboard-open {
 .stat-card {
   background: var(--card-bg); border-radius: var(--radius-sm);
   padding: 14px 8px; text-align: center; box-shadow: var(--shadow);
-  transition: transform 0.2s ease;
 }
-.stat-card:active { transform: scale(0.98); }
 .stat-num {
   font-size: 20px; color: var(--theme-primary); font-weight: 700;
 }
@@ -149,18 +137,15 @@ body.keyboard-open {
   background: var(--theme-light); color: var(--theme-primary);
   font-weight: 600;
 }
-.tab:active { transform: scale(0.96); }
 
 /* 卡片 */
 .card {
   background: var(--card-bg); border-radius: var(--radius);
   padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow);
-  transition: transform 0.2s ease;
 }
-.card:active { transform: translateY(1px); }
 .card-title {
   font-size: 17px; color: var(--theme-primary); font-weight: 600;
-  margin-bottom: 14px; display: flex; align-items: center; gap: 6px;
+  margin-bottom: 14px;
 }
 label {
   font-size: 14px; color: var(--text-sub); margin-bottom: 6px;
@@ -170,11 +155,10 @@ input, textarea, select {
   width: 100%; border: 1px solid var(--border);
   border-radius: var(--radius-sm); padding: 13px 14px; font-size: 14px;
   margin-bottom: 12px; outline: none; background: var(--card-bg);
-  color: var(--text-main); transition: all 0.2s ease;
+  color: var(--text-main);
 }
 input:focus, textarea:focus, select:focus {
   border-color: var(--theme-primary);
-  box-shadow: 0 0 0 4px rgba(var(--theme-primary-rgb), 0.15);
 }
 textarea {
   resize: none; height: 96px; line-height: 1.5;
@@ -184,10 +168,6 @@ textarea {
 .photo-upload {
   border: 2px dashed var(--border); border-radius: var(--radius-sm);
   padding: 18px; text-align: center; margin-bottom: 12px;
-  transition: all 0.2s ease;
-}
-.photo-upload:active {
-  border-color: var(--theme-primary); background: var(--theme-light);
 }
 .photo-preview, .record-photo {
   max-width: 100%; border-radius: 12px; margin: 10px 0;
@@ -205,12 +185,11 @@ textarea {
 .mood-item {
   padding: 8px 14px; background: var(--theme-light);
   border-radius: var(--radius-xs); font-size: 13px;
-  color: var(--theme-primary); transition: all 0.2s ease;
+  color: var(--theme-primary);
 }
 .mood-item.active {
   background: var(--theme-primary); color: #fff;
 }
-.mood-item:active { transform: scale(0.95); }
 
 /* 搜索筛选 */
 .search-box { margin-bottom: 14px; }
@@ -225,13 +204,12 @@ textarea {
 .filter-item, .sort-item {
   padding: 7px 11px; background: var(--card-bg);
   border: 1px solid var(--border); border-radius: var(--radius-xs);
-  font-size: 12px; color: var(--theme-primary); transition: all 0.2s ease;
+  font-size: 12px; color: var(--theme-primary);
 }
 .filter-item.active, .sort-item.active {
   background: var(--theme-primary); color: #fff;
   border-color: var(--theme-primary);
 }
-.filter-item:active, .sort-item:active { transform: scale(0.95); }
 
 /* 按钮 */
 .btn-group {
@@ -239,37 +217,34 @@ textarea {
 }
 .btn {
   padding: 15px; border-radius: var(--radius-sm); border: none;
-  font-size: 15px; font-weight: 500; transition: all 0.2s ease;
+  font-size: 15px; font-weight: 500;
 }
-.btn:active { transform: scale(0.97); }
 .btn-primary { background: var(--theme-primary); color: #fff; }
 .btn-light { background: var(--theme-light); color: var(--theme-primary); }
-.btn-full { grid-column: span 1; }
 
 /* 记录列表 */
 .record-list { margin-top: 14px; padding-bottom: 40px; }
 .record-item {
   background: var(--card-bg); border-radius: var(--radius-sm);
-  padding: 18px; margin-bottom: 14px; box-shadow: var(--shadow);
+  padding: 18px; margin-bottom: 14px;
   border-left: 4px solid var(--theme-primary);
-  transition: transform 0.2s ease; position: relative; overflow: hidden;
+  position: relative;
 }
 .record-item::before {
   content: "💖"; position: absolute; top: 10px; right: 10px;
   opacity: 0.15; font-size: 22px;
 }
-.record-item:active { transform: scale(0.99); }
 .record-time {
   font-size: 12px; color: var(--text-desc); margin-bottom: 6px;
 }
 .record-type {
   display: inline-block; padding: 4px 9px; background: var(--theme-light);
   color: var(--theme-primary); border-radius: var(--radius-xs);
-  font-size: 11px; margin-bottom: 8px; font-weight: 500;
+  font-size: 11px; margin-bottom: 8px;
 }
 .record-text {
   font-size: 14px; line-height: 1.6; color: var(--text-main);
-  margin: 6px 0; word-break: break-all;
+  margin: 6px 0;
 }
 .record-op {
   display: flex; gap: 10px; margin-top: 12px;
@@ -277,9 +252,8 @@ textarea {
 .op-btn {
   flex: 1; padding: 8px; border-radius: var(--radius-xs);
   border: none; font-size: 12px; background: #f3f4f6;
-  color: var(--text-sub); transition: all 0.2s ease;
+  color: var(--text-sub);
 }
-.op-btn:active { transform: scale(0.95); }
 .op-btn.edit {
   background: var(--theme-light); color: var(--theme-primary);
 }
@@ -299,13 +273,12 @@ textarea {
 .del-custom-btn {
   width: 34px; height: 34px; border-radius: var(--radius-xs);
   border: none; background: #fee2e2; color: #dc2626;
-  font-size: 12px; flex-shrink: 0;
 }
 
 /* 空状态 */
 .empty {
   text-align: center; padding: 50px 0; color: var(--text-desc);
-  font-size: 14px; line-height: 1.5;
+  font-size: 14px;
 }
 
 /* 动画 */
@@ -345,7 +318,7 @@ textarea {
 }
 .timeline-content {
   background: var(--card-bg); border-radius: var(--radius-xs);
-  padding: 12px; box-shadow: var(--shadow);
+  padding: 12px;
 }
 
 /* 日历 */
@@ -367,47 +340,30 @@ textarea {
 <body>
 
 <!-- 图片预览 -->
-<div id="imgPreviewModal" style="display:none;" onclick="closeImgPreview()">
+<div id="imgPreviewModal" onclick="closeImgPreview()">
   <div class="close">×</div>
   <img id="previewImg" src="">
 </div>
 
-<!-- 登录 -->
-<div class="modal" id="loginModal">
-  <div class="modal-card">
-    <div class="modal-title">💌 与她的点点滴滴</div>
-    <input type="email" class="modal-input" id="loginEmail" placeholder="邮箱">
-    <input type="password" class="modal-input" id="loginPwd" placeholder="密码（≥6位）">
-    <div class="modal-btns">
-      <button class="modal-btn btn-sub" onclick="register()">注册</button>
-      <button class="modal-btn btn-main" onclick="login()">登录</button>
-    </div>
-    <div class="modal-desc">登录后自动云端同步</div>
-  </div>
+<!-- 主内容 -->
+<div class="header">
+  <div class="main-title">💌 与她的点点滴滴</div>
+  <div id="girlName">我的女孩</div>
+  <div class="sub-title">用心珍藏每一个温柔瞬间</div>
 </div>
 
-<!-- 主内容 -->
-<div class="main-app-content" style="display:none;">
-  <div class="header">
-    <div class="main-title">💌 与她的点点滴滴</div>
-    <div id="girlName">我的女孩</div>
-    <div id="userStatus">🟢 已登录</div>
-    <div class="sub-title">用心珍藏每一个温柔瞬间</div>
-  </div>
+<div class="stats">
+  <div class="stat-card"><div class="stat-num" id="totalNum">0</div><div class="stat-text">总记录</div></div>
+  <div class="stat-card"><div class="stat-num" id="loveDay">0</div><div class="stat-text">陪伴天数</div></div>
+  <div class="stat-card"><div class="stat-num" id="nextDay">0</div><div class="stat-text">生日倒计时</div></div>
+</div>
 
-  <div class="stats">
-    <div class="stat-card"><div class="stat-num" id="totalNum">0</div><div class="stat-text">总记录</div></div>
-    <div class="stat-card"><div class="stat-num" id="loveDay">0</div><div class="stat-text">陪伴天数</div></div>
-    <div class="stat-card"><div class="stat-num" id="nextDay">0</div><div class="stat-text">生日倒计时</div></div>
-  </div>
-
-  <div class="tabs">
-    <div class="tab active" onclick="switchTab(0)">✍️写记录</div>
-    <div class="tab" onclick="switchTab(1)">🔍查回忆</div>
-    <div class="tab" onclick="switchTab(2)">📜时光轴</div>
-    <div class="tab" onclick="switchTab(3)">🎯她的档案</div>
-    <div class="tab" onclick="switchTab(4)">⚙️设置</div>
-  </div>
+<div class="tabs">
+  <div class="tab active" onclick="switchTab(0)">✍️写记录</div>
+  <div class="tab" onclick="switchTab(1)">🔍查回忆</div>
+  <div class="tab" onclick="switchTab(2)">📜时光轴</div>
+  <div class="tab" onclick="switchTab(3)">🎯她的档案</div>
+  <div class="tab" onclick="switchTab(4)">⚙️设置</div>
 </div>
 
 <!-- 写记录 -->
@@ -431,14 +387,14 @@ textarea {
       <div class="mood-item" onclick="selectMood(this,'害羞')">害羞</div>
       <div class="mood-item" onclick="selectMood(this,'期待')">期待</div>
     </div>
-    <input type="text" id="moodText" class="keyboard-scroll-target" placeholder="自定义心情">
+    <input type="text" id="moodText" placeholder="自定义心情">
 
     <label>💌 故事</label>
-    <textarea id="recordContent" class="keyboard-scroll-target" placeholder="记录细节..." oninput="updateWordCount()"></textarea>
+    <textarea id="recordContent" placeholder="记录细节..." oninput="updateWordCount()"></textarea>
     <div class="word-count" id="wordCount1">0 字</div>
 
     <label>💬 语录</label>
-    <textarea id="recordQuote" class="keyboard-scroll-target" placeholder="她的暖心话..." oninput="updateWordCount()"></textarea>
+    <textarea id="recordQuote" placeholder="她的暖心话..." oninput="updateWordCount()"></textarea>
     <div class="word-count" id="wordCount2">0 字</div>
 
     <label>📸 图片</label>
@@ -450,7 +406,7 @@ textarea {
   </div>
 
   <div class="btn-group">
-    <button class="btn btn-primary btn-full" onclick="saveRecord()">💾 保存记录</button>
+    <button class="btn btn-primary" onclick="saveRecord()">💾 保存记录</button>
   </div>
 </div>
 
@@ -518,265 +474,101 @@ textarea {
 
     <div class="card-title" style="margin-top:20px">📌 自定义</div>
     <div id="customWrap"></div>
-    <button class="btn btn-light btn-full" onclick="addCustom()">➕ 添加</button>
-    <button class="btn btn-primary btn-full" onclick="saveProfile()">✅ 保存档案</button>
+    <button class="btn btn-light" onclick="addCustom()">➕ 添加</button>
+    <button class="btn btn-primary" onclick="saveProfile()">✅ 保存档案</button>
   </div>
 </div>
 
 <!-- 设置 -->
 <div class="tab-content" id="tab4">
   <div class="card">
-    <div class="card-title">⚙️ 主题设置</div>
-    <div class="filter-box">
-      <div class="filter-item active" onclick="setTheme('pink')">初恋粉</div>
-    </div>
-  </div>
-  <div class="card">
     <div class="card-title">🔒 安全设置</div>
-    <button class="btn btn-light btn-full" onclick="setLockPwd()">设置锁屏密码</button>
-    <button class="btn btn-light btn-full" onclick="setFakePwd()">设置伪装密码</button>
+    <button class="btn btn-light" onclick="setLockPwd()">设置锁屏密码</button>
+    <button class="btn btn-light" onclick="setFakePwd()">设置伪装密码</button>
   </div>
-  
+
   <div class="card">
     <div class="card-title">☁️ 数据管理</div>
-    <button class="btn btn-light btn-full" onclick="syncData()">同步云端</button>
-    <div style="height:12px;"></div> <!-- 增加间距 -->
-    <button class="btn btn-light btn-full" onclick="backupData()">备份数据</button>
-    <button class="btn btn-light btn-full" onclick="restoreData()">恢复数据</button>
-    <div style="height:12px;"></div> <!-- 增加间距 -->
-    <button class="btn btn-danger btn-full" onclick="clearAllData()">清空所有数据</button>
-  </div>
-  
-  <div class="card">
-    <div class="card-title">👤 账号</div>
-    <button class="btn btn-light btn-full" onclick="changePwd()">修改密码</button>
-    <button class="btn btn-danger btn-full" onclick="logout()">退出登录</button>
+    <button class="btn btn-light" onclick="backupData()">备份数据</button>
+    <button class="btn btn-light" onclick="restoreData()">恢复数据</button>
+    <div style="height:12px;"></div>
+    <button class="btn btn-danger" onclick="clearAllData()">清空所有数据</button>
   </div>
 </div>
 
 <script>
-// ==============================================
-// 🔥 1. 替换成你自己的 Firebase 配置
-// ==============================================
-const firebaseConfig = {
-  apiKey: "AIzaSyCzKWM0DMQIQqr7-dXWQ8lP_FJHlf_nRKg",
-  authDomain: "lovetest-b5f35.firebaseapp.com",
-  databaseURL: "https://lovetest-b5f35-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "lovetest-b5f35",
-  storageBucket: "lovetest-b5f35.firebasestorage.app",
-  messagingSenderId: "1093050000609",
-  appId: "1:1093050000609:web:f6bd42d28fdcaecaf1c3a0",
-  measurementId: "G-5518PCMM0D"
-};
-
-// 初始化 Firebase
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.database();
-auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-
-// ==============================================
 // 全局变量
-// ==============================================
-let currentUser = null;
 let currentMood = "";
 let currentTab = 0;
 let currentFilter = "all";
 let currentSort = "desc";
 let editRecordId = null;
 let currentPhotoBase64 = "";
-let resizeTimer, scrollTimer;
 
-// ==============================================
-// 2. 主题
-// ==============================================
-function setTheme(theme) {
-  document.body.setAttribute('data-theme', theme);
-  localStorage.setItem('THEME', theme);
-  showTip('✅ 主题已切换');
-}
-const savedTheme = localStorage.getItem('THEME') || 'pink';
-document.body.setAttribute('data-theme', savedTheme);
-
-// ==============================================
-// 3. 图片预览（缩放+双击）
-// ==============================================
+// 图片预览
 function openImgPreview(src) {
-  const img = document.getElementById('previewImg');
-  img.src = src;
-  img.style.transform = 'scale(1)';
+  document.getElementById('previewImg').src = src;
   document.getElementById('imgPreviewModal').style.display = 'flex';
-  let scale = 1, lastScale = 1, startX;
-  img.addEventListener('touchstart', (e) => {
-    if (e.touches.length === 2) {
-      const dx = e.touches[0].clientX - e.touches[1].clientX;
-      const dy = e.touches[0].clientY - e.touches[1].clientY;
-      startX = Math.hypot(dx, dy);
-    }
-  });
-  img.addEventListener('touchmove', (e) => {
-    e.preventDefault();
-    if (e.touches.length === 2) {
-      const dist = Math.hypot(
-        e.touches[0].clientX - e.touches[1].clientX,
-        e.touches[0].clientY - e.touches[1].clientY
-      );
-      scale = lastScale * (dist / startX);
-      scale = Math.max(1, Math.min(3, scale));
-      img.style.transform = `scale(${scale})`;
-    }
-  });
-  img.addEventListener('touchend', () => lastScale = scale);
-  img.addEventListener('dblclick', () => {
-    scale = scale === 1 ? 2 : 1;
-    lastScale = scale;
-    img.style.transform = `scale(${scale})`;
-  });
 }
 function closeImgPreview() {
   document.getElementById('imgPreviewModal').style.display = 'none';
 }
 
-// ==============================================
-// 4. 登录状态监听
-// ==============================================
-auth.onAuthStateChanged(user => {
-  if (user) {
-    currentUser = user;
-    document.getElementById("loginModal").style.display = "none";
-    document.querySelectorAll(".main-app-content").forEach(e => e.style.display = "block");
-    document.getElementById("userStatus").innerText = `🟢 ${user.email}`;
-    syncData(); // 登录后自动同步云端
-    initAll();
-  } else {
-    currentUser = null;
-    document.getElementById("loginModal").style.display = "flex";
-    document.querySelectorAll(".main-app-content").forEach(e => e.style.display = "none");
-  }
-});
+// 初始化
+window.onload = function () {
+  initAll();
+};
 
-// ==============================================
-// 5. 登录 / 注册 / 退出
-// ==============================================
-function login() {
-  const e = document.getElementById("loginEmail").value.trim();
-  const p = document.getElementById("loginPwd").value.trim();
-  if (!e || p.length < 6) return showTip("密码≥6位");
-  auth.signInWithEmailAndPassword(e, p)
-    .then(() => showTip("✅ 登录成功"))
-    .catch(err => showTip("❌ " + err.message));
-}
-function register() {
-  const e = document.getElementById("loginEmail").value.trim();
-  const p = document.getElementById("loginPwd").value.trim();
-  if (!e || p.length < 6) return showTip("密码≥6位");
-  auth.createUserWithEmailAndPassword(e, p)
-    .then(() => showTip("✅ 注册成功"))
-    .catch(err => showTip("❌ " + err.message));
-}
-function logout() {
-  if (!confirm("确定退出？")) return;
-  auth.signOut();
-}
-
-// ==============================================
-// 6. 云端同步（核心）
-// ==============================================
-function syncData() {
-  if (!currentUser) return showTip("请先登录");
-  // 从云端拉取
-  db.ref('users/' + currentUser.uid).once('value').then(s => {
-    const d = s.val();
-    if (d) {
-      if (d.records) localStorage.setItem("RECORDS", JSON.stringify(Object.values(d.records)));
-      if (d.profile) localStorage.setItem("PROFILE", JSON.stringify(d.profile));
-      showTip("✅ 同步成功");
-      initAll();
-    } else {
-      // 云端无数据：上传本地
-      uploadLocalToCloud();
-    }
-  });
-}
-// 本地 → 云端
-function uploadLocalToCloud() {
-  if (!currentUser) return;
-  const records = JSON.parse(localStorage.getItem("RECORDS") || "[]");
-  const profile = JSON.parse(localStorage.getItem("PROFILE") || "{}");
-  const updates = {};
-  updates['users/' + currentUser.uid + '/profile'] = profile;
-  records.forEach(r => {
-    updates['users/' + currentUser.uid + '/records/' + r.id] = r;
-  });
-  db.ref().update(updates);
-}
-
-// ==============================================
-// 7. 保存记录（自动同步云端）
-// ==============================================
+// 保存记录
 function saveRecord() {
   const t = document.getElementById("recordType").value;
   const m = document.getElementById("moodText").value.trim() || currentMood || "未填写";
   const c = document.getElementById("recordContent").value.trim();
   const q = document.getElementById("recordQuote").value.trim() || "无";
-  if (!c && !currentPhotoBase64) return showTip("写点内容或传图");
 
-  const time = editRecordId
-    ? (JSON.parse(localStorage.getItem("RECORDS") || "[]").find(x => x.id == editRecordId)?.time || getTime())
-    : getTime();
+  if (!c && !currentPhotoBase64) {
+    alert("请写点内容或上传图片");
+    return;
+  }
 
   const rec = {
     id: editRecordId || Date.now(),
-    time, type: t, mood: m, content: c, quote: q, photo: currentPhotoBase64
+    time: getTime(),
+    type: t,
+    mood: m,
+    content: c,
+    quote: q,
+    photo: currentPhotoBase64
   };
 
-  // 本地保存
-  let rs = JSON.parse(localStorage.getItem("RECORDS") || "[]");
+  let records = JSON.parse(localStorage.getItem("RECORDS") || "[]");
+
   if (editRecordId) {
-    const i = rs.findIndex(x => x.id == editRecordId);
-    if (i !== -1) rs[i] = rec;
-    showTip("✅ 修改成功");
+    const i = records.findIndex(x => x.id == editRecordId);
+    if (i !== -1) records[i] = rec;
   } else {
-    rs.unshift(rec);
-    showTip("✅ 保存成功");
-    if (navigator.vibrate) navigator.vibrate(30);
-  }
-  localStorage.setItem("RECORDS", JSON.stringify(rs));
-
-  // 云端保存
-  if (currentUser) {
-    db.ref('users/' + currentUser.uid + '/records/' + rec.id).set(rec);
+    records.unshift(rec);
   }
 
+  localStorage.setItem("RECORDS", JSON.stringify(records));
   document.querySelector(".main-title").classList.add("heart");
   setTimeout(() => document.querySelector(".main-title").classList.remove("heart"), 600);
-
   clearDraft();
   initAll();
 }
 
-// ==============================================
-// 8. 删除记录（本地+云端）
-// ==============================================
+// 删除记录
 function deleteRecord(id) {
   if (!confirm("确定删除？")) return;
-  // 本地
-  let rs = JSON.parse(localStorage.getItem("RECORDS") || "[]");
-  rs = rs.filter(x => x.id != id);
-  localStorage.setItem("RECORDS", JSON.stringify(rs));
-  // 云端
-  if (currentUser) {
-    db.ref('users/' + currentUser.uid + '/records/' + id).remove();
-  }
-  showTip("🗑️ 已删除");
+  let records = JSON.parse(localStorage.getItem("RECORDS") || "[]");
+  records = records.filter(x => x.id != id);
+  localStorage.setItem("RECORDS", JSON.stringify(records));
   initAll();
 }
 
-// ==============================================
-// 9. 保存档案（本地+云端）
-// ==============================================
+// 保存档案
 function saveProfile() {
-  const p = {
+  const profile = {
     name: document.getElementById("nickname").value.trim(),
     birth: document.getElementById("birthday").value,
     first: document.getElementById("firstDay").value,
@@ -785,54 +577,60 @@ function saveProfile() {
     habit: document.getElementById("habit").value.trim(),
     custom: []
   };
-  document.querySelectorAll(".custom-item").forEach(i => {
-    p.custom.push({
-      k: i.querySelector(".cKey").value,
-      v: i.querySelector(".cVal").value
+
+  document.querySelectorAll(".custom-item").forEach(item => {
+    profile.custom.push({
+      k: item.querySelector(".cKey").value,
+      v: item.querySelector(".cVal").value
     });
   });
-  localStorage.setItem("PROFILE", JSON.stringify(p));
-  if (currentUser) {
-    db.ref('users/' + currentUser.uid + '/profile').set(p);
-  }
-  document.getElementById("girlName").innerText = p.name || "我的女孩";
-  updateStats();
-  showTip("✅ 档案已保存");
+
+  localStorage.setItem("PROFILE", JSON.stringify(profile));
+  document.getElementById("girlName").innerText = profile.name || "我的女孩";
+  initAll();
 }
 
-// ==============================================
-// 10. 工具函数（时间、字数、上传、初始化等）
-// ==============================================
+// 工具函数
 function getTime() {
   const now = new Date();
-  const y = now.getFullYear(), m = String(now.getMonth()+1).padStart(2,'0'), d = String(now.getDate()).padStart(2,'0');
-  const h = String(now.getHours()).padStart(2,'0'), i = String(now.getMinutes()).padStart(2,'0');
-  return `${y}-${m}-${d}T${h}:${i}`;
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  const h = String(now.getHours()).padStart(2, '0');
+  const i = String(now.getMinutes()).padStart(2, '0');
+  return `${y}-${m}-${d} ${h}:${i}`;
 }
+
 function updateWordCount() {
   const a = document.getElementById("recordContent").value.length;
   const b = document.getElementById("recordQuote").value.length;
   document.getElementById("wordCount1").innerText = a + " 字";
   document.getElementById("wordCount2").innerText = b + " 字";
 }
+
 function handlePhotoUpload(e) {
-  const f = e.target.files[0];
-  if (!f) return;
-  if (f.size > 6 * 1024 * 1024) return showTip("图片≤6MB");
-  const r = new FileReader();
-  r.onload = e => {
-    currentPhotoBase64 = e.target.result;
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 6 * 1024 * 1024) {
+    alert("图片不能大于6MB");
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    currentPhotoBase64 = ev.target.result;
     document.getElementById("photoPreviewWrap").innerHTML = `
       <img src="${currentPhotoBase64}" class="photo-preview">
       <button class="photo-remove" onclick="removePhoto()">删除</button>
     `;
   };
-  r.readAsDataURL(f);
+  reader.readAsDataURL(file);
 }
+
 function removePhoto() {
   currentPhotoBase64 = "";
   document.getElementById("photoPreviewWrap").innerHTML = "";
 }
+
 function initAll() {
   loadProfile();
   showRecords();
@@ -843,15 +641,14 @@ function initAll() {
   loadDraft();
   updateWordCount();
 }
+
 function switchTab(i) {
   currentTab = i;
   document.querySelectorAll(".tab").forEach((t, j) => t.classList.toggle("active", j === i));
   document.querySelectorAll(".tab-content").forEach((c, j) => c.classList.toggle("active", j === i));
-  if (i === 1) showRecords();
-  if (i === 2) { renderTimeline(); renderCalendar(); renderMoodChart(); }
-  if (i === 3) loadProfile();
   window.scrollTo(0, 0);
 }
+
 function selectMood(el, t) {
   document.querySelectorAll(".mood-item").forEach(i => i.classList.remove("active"));
   el.classList.add("active");
@@ -859,21 +656,25 @@ function selectMood(el, t) {
   document.getElementById("moodText").value = t;
   saveDraft();
 }
+
 function filterRecord(el, t) {
   currentFilter = t;
   document.querySelectorAll(".filter-item").forEach(i => i.classList.remove("active"));
   el.classList.add("active");
   showRecords();
 }
+
 function sortRecord(el, t) {
   currentSort = t;
   document.querySelectorAll(".sort-item").forEach(i => i.classList.remove("active"));
   el.classList.add("active");
   showRecords();
 }
+
 function searchRecord() {
   showRecords();
 }
+
 function saveDraft() {
   localStorage.setItem("DRAFT", JSON.stringify({
     type: document.getElementById("recordType").value,
@@ -883,6 +684,7 @@ function saveDraft() {
     photo: currentPhotoBase64
   }));
 }
+
 function loadDraft() {
   const d = JSON.parse(localStorage.getItem("DRAFT") || "{}");
   if (d.type) document.getElementById("recordType").value = d.type;
@@ -898,6 +700,7 @@ function loadDraft() {
   }
   updateWordCount();
 }
+
 function clearDraft() {
   localStorage.removeItem("DRAFT");
   document.getElementById("moodText").value = "";
@@ -911,6 +714,7 @@ function clearDraft() {
   document.getElementById("recordType").selectedIndex = 0;
   updateWordCount();
 }
+
 function addCustom() {
   const wrap = document.getElementById("customWrap");
   const div = document.createElement("div");
@@ -922,6 +726,7 @@ function addCustom() {
   `;
   wrap.appendChild(div);
 }
+
 function loadProfile() {
   const p = JSON.parse(localStorage.getItem("PROFILE") || "{}");
   document.getElementById("nickname").value = p.name || "";
@@ -931,6 +736,7 @@ function loadProfile() {
   document.getElementById("hate").value = p.hate || "";
   document.getElementById("habit").value = p.habit || "";
   document.getElementById("girlName").innerText = p.name || "我的女孩";
+
   const wrap = document.getElementById("customWrap");
   wrap.innerHTML = "";
   (p.custom || []).forEach(i => {
@@ -944,6 +750,7 @@ function loadProfile() {
     wrap.appendChild(div);
   });
 }
+
 function editRecord(id) {
   const rs = JSON.parse(localStorage.getItem("RECORDS") || "[]");
   const r = rs.find(x => x.id == id);
@@ -952,23 +759,24 @@ function editRecord(id) {
   document.getElementById("moodText").value = r.mood;
   document.getElementById("recordContent").value = r.content;
   document.getElementById("recordQuote").value = r.quote;
+  currentPhotoBase64 = r.photo || "";
   if (r.photo) {
-    currentPhotoBase64 = r.photo;
     document.getElementById("photoPreviewWrap").innerHTML = `
       <img src="${currentPhotoBase64}" class="photo-preview">
       <button class="photo-remove" onclick="removePhoto()">删除</button>
     `;
   } else {
-    currentPhotoBase64 = "";
     document.getElementById("photoPreviewWrap").innerHTML = "";
   }
   editRecordId = id;
   switchTab(0);
 }
+
 function copyRecord(c, q) {
   const txt = `💌 故事：${c}\n💬 语录：${q}`;
-  navigator.clipboard.writeText(txt).then(() => showTip("✅ 复制成功")).catch(() => alert(txt));
+  navigator.clipboard.writeText(txt).then(() => alert("复制成功"));
 }
+
 function showRecords() {
   const rs = JSON.parse(localStorage.getItem("RECORDS") || "[]");
   const box = document.getElementById("recordBox");
@@ -998,7 +806,7 @@ function showRecords() {
   f.forEach(x => {
     h += `
       <div class="record-item">
-        <div class="record-time">📅 ${x.time.replace("T", " ")}</div>
+        <div class="record-time">📅 ${x.time}</div>
         <div class="record-type">${x.type}</div>
         <div class="record-text">😊 ${x.mood}</div>
         <div class="record-text">💌 ${x.content || "无"}</div>
@@ -1006,7 +814,7 @@ function showRecords() {
         ${x.photo ? `<img src="${x.photo}" class="record-photo" onclick="openImgPreview('${x.photo}')">` : ""}
         <div class="record-op">
           <button class="op-btn edit" onclick="editRecord(${x.id})">编辑</button>
-          <button class="op-btn" onclick="copyRecord('${x.content?.replace(/'/g, "\\'") || ""}', '${x.quote?.replace(/'/g, "\\'") || ""}')">复制</button>
+          <button class="op-btn" onclick="copyRecord('${(x.content||'').replace(/'/g, "\\'")}', '${(x.quote||'').replace(/'/g, "\\'")}')">复制</button>
           <button class="op-btn danger" onclick="deleteRecord(${x.id})">删除</button>
         </div>
       </div>
@@ -1014,6 +822,7 @@ function showRecords() {
   });
   box.innerHTML = h;
 }
+
 function updateStats() {
   const rs = JSON.parse(localStorage.getItem("RECORDS") || "[]");
   document.getElementById("totalNum").innerText = rs.length;
@@ -1029,6 +838,7 @@ function updateStats() {
   } else {
     document.getElementById("loveDay").innerText = 0;
   }
+
   if (p.birth) {
     const bd = new Date(p.birth);
     const now = new Date();
@@ -1040,6 +850,7 @@ function updateStats() {
     document.getElementById("nextDay").innerText = 0;
   }
 }
+
 function renderTimeline() {
   const rs = JSON.parse(localStorage.getItem("RECORDS") || "[]");
   const box = document.getElementById("timelineBox");
@@ -1060,7 +871,7 @@ function renderTimeline() {
     yearMap[year].forEach(r => {
       h += `
         <div class="timeline-item">
-          <div class="timeline-date">${r.time.replace("T", " ")}</div>
+          <div class="timeline-date">${r.time}</div>
           <div class="timeline-content">
             <div style="color:var(--theme-primary);font-weight:500;">${r.type}</div>
             <div style="margin:4px 0;">${r.content || "无"}</div>
@@ -1073,6 +884,7 @@ function renderTimeline() {
   });
   box.innerHTML = h;
 }
+
 function renderCalendar() {
   const box = document.getElementById("calendarBox");
   const now = new Date();
@@ -1087,6 +899,7 @@ function renderCalendar() {
   }
   box.innerHTML = h;
 }
+
 function renderMoodChart() {
   const rs = JSON.parse(localStorage.getItem("RECORDS") || "[]");
   const moodCount = {};
@@ -1108,6 +921,7 @@ function renderMoodChart() {
     options: { responsive: true, maintainAspectRatio: false }
   });
 }
+
 function exportPdf() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
@@ -1120,6 +934,7 @@ function exportPdf() {
     doc.save("与她的回忆.pdf");
   });
 }
+
 function exportImage() {
   const content = document.getElementById("recordBox");
   html2canvas(content, { useCORS: true }).then(canvas => {
@@ -1129,14 +944,16 @@ function exportImage() {
     a.click();
   });
 }
+
 function backupData() {
   const data = {
     records: localStorage.getItem("RECORDS"),
     profile: localStorage.getItem("PROFILE"),
     draft: localStorage.getItem("DRAFT")
   };
-  navigator.clipboard.writeText(JSON.stringify(data)).then(() => showTip("✅ 备份已复制"));
+  navigator.clipboard.writeText(JSON.stringify(data)).then(() => alert("备份已复制到剪贴板"));
 }
+
 function restoreData() {
   const data = prompt("粘贴备份内容：");
   if (!data) return;
@@ -1145,67 +962,35 @@ function restoreData() {
     if (d.records) localStorage.setItem("RECORDS", d.records);
     if (d.profile) localStorage.setItem("PROFILE", d.profile);
     if (d.draft) localStorage.setItem("DRAFT", d.draft);
-    showTip("✅ 恢复成功");
+    alert("恢复成功");
     initAll();
   } catch (e) {
-    showTip("❌ 格式错误");
+    alert("格式错误");
   }
 }
+
 function clearAllData() {
   if (!confirm("确定清空所有数据？不可恢复！")) return;
   localStorage.clear();
-  if (currentUser) {
-    db.ref('users/' + currentUser.uid).remove();
-  }
-  showTip("🗑️ 已清空");
+  alert("已清空");
   location.reload();
 }
-function changePwd() {
-  const old = prompt("当前密码：");
-  if (!old) return;
-  const cred = firebase.auth.EmailAuthProvider.credential(currentUser.email, old);
-  currentUser.reauthenticateWithCredential(cred).then(() => {
-    const np = prompt("新密码（≥6位）：");
-    if (np && np.length >= 6) {
-      currentUser.updatePassword(np).then(() => showTip("✅ 修改成功"));
-    }
-  }).catch(() => showTip("原密码错误"));
-}
+
 function setLockPwd() {
   const p = prompt("设置锁屏密码（4位以上）：");
   if (p && p.length >= 4) {
     localStorage.setItem("LOCK_PWD", p);
-    showTip("✅ 已设置");
+    alert("已设置");
   }
 }
+
 function setFakePwd() {
   const p = prompt("设置伪装密码：");
   if (p && p.length >= 4) {
     localStorage.setItem("FAKE_PWD", p);
-    showTip("✅ 已设置");
+    alert("已设置");
   }
 }
-function showTip(t) {
-  const m = document.createElement("div");
-  m.className = "modal";
-  m.innerHTML = `<div class="modal-card"><div class="modal-title">${t}</div></div>`;
-  document.body.appendChild(m);
-  setTimeout(() => m.remove(), 1400);
-}
-
-// 键盘适配
-const oh = window.innerHeight;
-window.addEventListener("resize", () => {
-  clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => {
-    const ch = window.innerHeight;
-    if (ch < oh - 120) {
-      document.body.classList.add("keyboard-open");
-    } else {
-      document.body.classList.remove("keyboard-open");
-    }
-  }, 150);
-});
 </script>
 </body>
 </html>
